@@ -1,0 +1,62 @@
+// JCL_DEBUG_EXPERT_GENERATEJDBG OFF
+// JCL_DEBUG_EXPERT_INSERTJDBG OFF
+// JCL_DEBUG_EXPERT_DELETEMAPFILE OFF
+package BuildEvents;
+
+{$R *.res}
+{$R *.dres}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'Build Events for Delphi 2006'}
+{$DESIGNONLY}
+{$IMPLICITBUILD OFF}
+
+requires
+  DesignIDE,
+  VclX,
+  VCL,
+  RTL,
+  VclActnBand,
+  VclSmp,
+  tmsdXE7,
+  Jcl,
+  tmsexdXE7,
+  JvCore,
+  JvStdCtrls,
+  vclwinx;
+
+contains
+  uBuildOptionExpert in 'uBuildOptionExpert.pas',
+  uBuildMisc in 'uBuildMisc.pas',
+  uBuildOptionsForm in 'uBuildOptionsForm.pas' {BuildOptionsForm},
+  uBuildNotifier in 'uBuildNotifier.pas',
+  uBuildEngine in 'uBuildEngine.pas',
+  uBuildCommandEditor in 'uBuildCommandEditor.pas' {BuildCommandEditorDlg},
+  uBuildMessages in 'uBuildMessages.pas',
+  uBuildMacroEditor in 'uBuildMacroEditor.pas' {MacroEditor},
+  UFParam in 'UFParam.pas' {Form1},
+  UBuildEventStat in 'UBuildEventStat.pas' {Form2};
+
+end.
