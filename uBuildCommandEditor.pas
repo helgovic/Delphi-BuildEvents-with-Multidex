@@ -6,7 +6,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Graphics, Forms, Controls, StdCtrls, Buttons,
-  ExtCtrls, Grids, ComCtrls, uBuildMisc, Menus, Vcl.ValEdit, AdvSmoothButton,
+  ExtCtrls, Grids, ComCtrls, uBuildMisc, Menus, Vcl.ValEdit,
   Vcl.WinXCtrls;
 
 type

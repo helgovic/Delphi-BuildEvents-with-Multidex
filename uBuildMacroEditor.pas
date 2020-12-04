@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Graphics, Forms, Controls, StdCtrls, Buttons,
-  ExtCtrls, AdvSmoothButton;
+  ExtCtrls;
 
 type
   TMacroEditor = class(TForm)
