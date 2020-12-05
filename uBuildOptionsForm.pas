@@ -44,12 +44,12 @@ type
     TSMessages: TToggleSwitch;
     TSPostBuild: TToggleSwitch;
     TSPrebuild: TToggleSwitch;
-    BSave: TPanel;
-    btnCancel: TPanel;
-    btnLoad: TPanel;
-    btnOK: TPanel;
     ACGPostbuild: TStringGrid;
     ACGPreBuild: TStringGrid;
+    BSave: TButton;
+    btnCancel: TButton;
+    btnLoad: TButton;
+    btnOK: TButton;
     procedure FormCreate(Sender: TObject);
     procedure btnLoadClick(Sender: TObject);
     procedure cbFontNamesDrawItem(AControl: TWinControl; AIndex: Integer;
@@ -72,8 +72,6 @@ type
     procedure CBPlatFormsChange(Sender: TObject);
     procedure TSPrebuildClick(Sender: TObject);
     procedure TSPostBuildClick(Sender: TObject);
-    procedure btnCancelClick(Sender: TObject);
-    procedure btnOKClick(Sender: TObject);
     procedure ACGPostbuildDrawCell(Sender: TObject; ACol, ARow: Integer;
       Rect: TRect; State: TGridDrawState);
   private
@@ -444,11 +442,6 @@ begin
 
 end;
 
-procedure TBuildOptionsForm.btnCancelClick(Sender: TObject);
-begin
-   BuildOptionsForm.ModalResult := mrCancel;
-end;
-
 procedure TBuildOptionsForm.btnLoadClick(Sender: TObject);
 begin
 
@@ -470,11 +463,6 @@ begin
 
           end;
 
-end;
-
-procedure TBuildOptionsForm.btnOKClick(Sender: TObject);
-begin
-   BuildOptionsForm.ModalResult := mrOK;
 end;
 
 procedure TBuildOptionsForm.SaveScreen;

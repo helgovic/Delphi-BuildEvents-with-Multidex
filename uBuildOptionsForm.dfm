@@ -284,7 +284,7 @@ object BuildOptionsForm: TBuildOptionsForm
     TabOrder = 1
     ThumbColor = clGreen
   end
-  object BSave: TPanel
+  object BSave: TButton
     Left = 129
     Top = 508
     Width = 75
@@ -298,9 +298,10 @@ object BuildOptionsForm: TBuildOptionsForm
     Font.Style = []
     ParentFont = False
     TabOrder = 2
+    TabStop = False
     OnClick = BSaveClick
   end
-  object btnCancel: TPanel
+  object btnCancel: TButton
     Left = 356
     Top = 508
     Width = 75
@@ -312,11 +313,12 @@ object BuildOptionsForm: TBuildOptionsForm
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
+    ModalResult = 2
     ParentFont = False
     TabOrder = 3
-    OnClick = btnCancelClick
+    TabStop = False
   end
-  object btnLoad: TPanel
+  object btnLoad: TButton
     Left = 205
     Top = 508
     Width = 75
@@ -330,9 +332,10 @@ object BuildOptionsForm: TBuildOptionsForm
     Font.Style = []
     ParentFont = False
     TabOrder = 4
+    TabStop = False
     OnClick = btnLoadClick
   end
-  object btnOK: TPanel
+  object btnOK: TButton
     Left = 281
     Top = 508
     Width = 75
@@ -344,9 +347,10 @@ object BuildOptionsForm: TBuildOptionsForm
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
+    ModalResult = 1
     ParentFont = False
     TabOrder = 5
-    OnClick = btnOKClick
+    TabStop = False
   end
   object OpenDialog1: TOpenDialog
     DefaultExt = '.ini'

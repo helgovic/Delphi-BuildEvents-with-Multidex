@@ -16,6 +16,11 @@ type
   { This is a set of messages that can be cleared. }
   TClearMessages = Set of TClearMessage;
 
+  TBADIToolsAPIFunctions = record
+     Class Procedure RegisterFormClassForTheming(Const AFormClass : TCustomFormClass;
+        Const Component : TComponent = Nil); static;
+  end;
+
   TBuildOptionExpert = class(TObject)
   private
     { Private declarations }
@@ -181,7 +186,9 @@ begin
 
       end;
 
-  BuildOptionsForm := TBuildOptionsForm.Create(nil);
+   BuildOptionsForm := TBuildOptionsForm.Create(nil);
+
+   TBADIToolsAPIFunctions.RegisterFormClassForTheming(TBuildOptionsForm, BuildOptionsForm);
 
 end;
 
@@ -1009,6 +1016,35 @@ begin
     end;
     FAutoSaveTimer.Enabled := True;
   end;
+end;
+
+{ TBADIToolsAPIFunctions }
+
+class procedure TBADIToolsAPIFunctions.RegisterFormClassForTheming(
+  const AFormClass: TCustomFormClass; const Component: TComponent);
+begin
+
+   Var
+     {$IFDEF DXE104} // Breaking change to the Open Tools API - They fixed the wrongly defined interface
+     ITS : IOTAIDEThemingServices;
+     {$ELSE}
+     ITS : IOTAIDEThemingServices250;
+     {$ENDIF DXE104}
+
+   Begin
+     {$IFDEF DXE104}
+     If Supports(BorlandIDEServices, IOTAIDEThemingServices, ITS) Then
+     {$ELSE}
+     If Supports(BorlandIDEServices, IOTAIDEThemingServices250, ITS) Then
+     {$ENDIF DXE104}
+       If ITS.IDEThemingEnabled Then
+         Begin
+           ITS.RegisterFormClass(AFormClass);
+           If Assigned(Component) Then
+             ITS.ApplyTheme(Component);
+         End;
+   End;
+
 end;
 
 initialization
