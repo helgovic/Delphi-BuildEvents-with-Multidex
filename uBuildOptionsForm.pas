@@ -189,9 +189,6 @@ begin
 
   CBPlatForms.ItemIndex:= CBPlatForms.Items.IndexOf(CurrentProject.CurrentPlatform);
 
-//  CBConfig.OnChange := CBConfigItemChanged;
-//  CBPlatForms.OnChanged := CBPlatFormsItemChanged;
-
   CLBParams.Clear;
 
   for i := 0 to ProjOptions.FParams.Count - 1 do
@@ -234,8 +231,6 @@ begin
     SaveScreen;
 
     AOptions.SaveAll;
-
-    BuildOptionExpert.SetAutoSaveOptions;
 
   end;
 

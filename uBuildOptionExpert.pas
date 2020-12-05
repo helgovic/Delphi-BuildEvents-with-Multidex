@@ -26,8 +26,6 @@ type
     FBuildTimer: TTimer;
     FAutoSaveTimer: TTimer;
     procedure LogResults(AType: TMessageType; AText: String);
-    procedure InitAutoSave;
-    procedure UninitAutoSave;
   protected
     { Protected declarations }
     {$IFDEF D7_UP}
@@ -65,7 +63,6 @@ type
       AParams: array of const); overload;
     procedure LogMessages(AType: TMessageType; AStrings : TStrings);
     procedure TriggerPostBuildEvent(ASuccess: Boolean);
-    procedure SetAutoSaveOptions;
 
     { Action Event Handlers }
     procedure MenuOptionsExecute(Sender : TObject);
@@ -127,11 +124,6 @@ var
 begin
 
   inherited Create;
-  FBuildTimer := TTimer.Create(nil);
-  FBuildTimer.Interval := 500;
-  FBuildTimer.Enabled := False;
-  FBuildTimer.OnTimer := DoOnPostBuildTimerEvent;
-
   FShowMsg := True;
   FFontName := C_DEFAULT_FONT_NAME;
   FFontSize := C_DEFAULT_FONT_SIZE;
@@ -189,11 +181,7 @@ begin
 
       end;
 
-  SetAutoSaveOptions;
-
-  InitAutoSave;
-
-  BuildOptionsForm := TBuildOptionsForm.Create(Application);
+  BuildOptionsForm := TBuildOptionsForm.Create(nil);
 
 end;
 
@@ -218,10 +206,6 @@ begin
   FMenuOptions.Free;
   FActionOptions.Free;
 
-  UnInitAutoSave;
-
-  if Assigned(FBuildTimer) then FBuildTimer.Free;
-
   (BorlandIDEServices as IOTACompileServices).RemoveNotifier(CompNot);
 
   if Assigned(FOptions)
@@ -229,26 +213,8 @@ begin
      FOptions.Free;
 
   BuildOptionsForm.Free;
-  ClearMessages([cmBuildEvents, cmAll]);
+//  ClearMessages([cmBuildEvents, cmAll]);
   inherited Destroy;
-end;
-
-procedure TBuildOptionExpert.InitAutoSave;
-begin
-  if (not Assigned(FAutoSaveTimer)) then
-    FAutoSaveTimer := TTimer.Create(nil);
-  FAutoSaveTimer.Interval := C_5_MINUTES;
-  FAutoSaveTimer.Enabled := False;
-  FAutoSaveTimer.OnTimer := DoOnAutoSaveTimerEvent;
-end;
-
-procedure TBuildOptionExpert.UninitAutoSave;
-begin
-  if Assigned(FAutoSaveTimer) then
-  begin
-    FAutoSaveTimer.Enabled := False;
-    FAutoSaveTimer.Free;
-  end;
 end;
 
 function TBuildOptionExpert.AddAction(ACaption, AHint, AName: String;
@@ -1045,17 +1011,8 @@ begin
   end;
 end;
 
-procedure TBuildOptionExpert.SetAutoSaveOptions;
-begin
-  if Assigned(FAutoSaveTimer) then
-  begin
-    FAutoSaveTimer.Interval := ProjOptions.AutoSaveInterval * 60000;
-    FAutoSaveTimer.Enabled := ProjOptions.AutoSaveProject;
-  end;
-end;
-
 initialization
-  FBuildOptionExpert := TBuildOptionExpert.Instance;
+  FBuildOptionExpert := TBuildOptionExpert.Instance;
 
 finalization
   FreeAndNil(FBuildOptionExpert);
