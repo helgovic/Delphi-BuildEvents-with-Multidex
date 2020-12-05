@@ -1,0 +1,96 @@
+object FRepositories: TFRepositories
+  Left = 0
+  Top = 0
+  BorderStyle = bsToolWindow
+  Caption = 'Repositories'
+  ClientHeight = 303
+  ClientWidth = 645
+  Color = 3288877
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poDesktopCenter
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Label1: TLabel
+    Left = 24
+    Top = 13
+    Width = 91
+    Height = 13
+    Caption = 'Select Repositories'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+  end
+  object CLBRepositories: TCheckListBox
+    Left = 24
+    Top = 36
+    Width = 597
+    Height = 175
+    Color = 3288877
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ItemHeight = 13
+    ParentFont = False
+    TabOrder = 0
+  end
+  object BCancel: TButton
+    Left = 143
+    Top = 232
+    Width = 117
+    Height = 49
+    Caption = 'Cancel'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ModalResult = 2
+    ParentFont = False
+    TabOrder = 1
+    OnClick = BCancelClick
+  end
+  object BOK: TButton
+    Left = 385
+    Top = 232
+    Width = 117
+    Height = 49
+    Caption = 'OK'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ModalResult = 1
+    ParentFont = False
+    TabOrder = 2
+    OnClick = BOKClick
+  end
+  object BAddRepos: TButton
+    Left = 264
+    Top = 232
+    Width = 117
+    Height = 49
+    Caption = 'Add Repository'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 3
+    OnClick = BAddReposClick
+  end
+end
