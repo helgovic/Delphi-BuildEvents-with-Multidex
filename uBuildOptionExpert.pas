@@ -201,18 +201,19 @@ destructor TBuildOptionExpert.Destroy;
 var
   Service : INTAServices;
 begin
-//  Service := (BorlandIDEServices as INTAServices);
 
-//  { Destroy the menu item }
-//  if (FProjectMenu = nil) then
-//  begin
-//    if (-1 <> Service.MainMenu.Items.IndexOf(FMenuOptions)) then
-//      Service.MainMenu.Items.Remove(FMenuOptions);
-//  end else
-//  begin
-//    if (-1 <> FProjectMenu.IndexOf(FMenuOptions)) then
-//      FProjectMenu.Remove(FMenuOptions);
-//  end;
+  Service := (BorlandIDEServices as INTAServices);
+
+  { Destroy the menu item }
+  if (FProjectMenu = nil) then
+  begin
+    if (-1 <> Service.MainMenu.Items.IndexOf(FMenuOptions)) then
+      Service.MainMenu.Items.Remove(FMenuOptions);
+  end else
+  begin
+    if (-1 <> FProjectMenu.IndexOf(FMenuOptions)) then
+      FProjectMenu.Remove(FMenuOptions);
+  end;
 
   FMenuOptions.Free;
   FActionOptions.Free;
@@ -227,8 +228,8 @@ begin
   then
      FOptions.Free;
 
-//  BuildOptionsForm.Free;
-//  ClearMessages([cmBuildEvents, cmAll]);
+  BuildOptionsForm.Free;
+  ClearMessages([cmBuildEvents, cmAll]);
   inherited Destroy;
 end;
 
@@ -739,6 +740,14 @@ var
   Found: Boolean;
 
 begin
+
+  if (not FileExists(System.SysUtils.GetEnvironmentVariable('BDS') + '\bin\CodeGear.CommonMD.Targets')) and
+     (not FileExists(System.SysUtils.GetEnvironmentVariable('BDS') + '\bin\CodeGear.CommonNM.Targets'))
+  then
+     begin
+        ShowMessage('Target files not found. You have to run Targets.exe, located in the bin directory.');
+        Exit;
+     end;
 
   FOptions.LoadProjectEvents(ModuleName);
 
