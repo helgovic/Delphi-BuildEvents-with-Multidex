@@ -1378,7 +1378,7 @@ var
 
 begin
 
-  for i := 0 to FPlatformConfigBuildOptions.Count - 1 do
+  for i := FPlatformConfigBuildOptions.Count - 1 downto 0 do
      begin
         FPlatformConfigBuildOptions[i].FPreBuildEvents.DisposeOf;
         FPlatformConfigBuildOptions[i].FPostBuildEvents.DisposeOf;
