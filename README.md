@@ -26,6 +26,8 @@ If you intend to support Android before version 5.0 (minSDK < 21), you need to d
 
 To run the dex job check the RunDex parameter.
 
+if you intend to support Android before version 5.0 (minSDK < 21), you need to do the following.
+
 Add the MultiDex.jar in the MultidexJarPas directory to your project libs. Add the AndroidApi.JNI.MultiDex.pas in the MultidexJarPas directory to your mainform uses list. Add the following statements at the start of your main forms FormCreate procedure.
 
 if TJBuild_VERSION.JavaClass.SDK_INT < 21
