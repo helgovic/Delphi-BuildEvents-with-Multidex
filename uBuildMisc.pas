@@ -1,9 +1,6 @@
 unit uBuildMisc;
-
 interface
-
 {$I BuildEvents.inc}
-
 uses
   Classes,
   SysUtils,
@@ -22,15 +19,11 @@ uses
   System.Actions,
   System.Generics.Collections,
   JCLStrings;
-
 const
   REG_KEY = '\Software\SoftMagical\Experts';
   REG_BUILD_OPTIONS = 'BuildOptions';
-
 type
-
 { TAutoCloseMessage }
-
   TAutoCloseMessage = class
   private
     FForm: TForm;
@@ -53,20 +46,16 @@ type
       AButtons: TMsgDlgButtons; AHelpContext: Longint; ADefResult: Word;
       ASeconds: Integer = 10);
     destructor Destroy; override;
-
     function ResultStr(AIndex: Integer): string;
     function Execute: Word;
   end;
-
   TWaitOption = (woNoWait, woUntilStart, woUntilFinish);
   TPostBuildOption = (boAlways, boSuccess, boFailed, boNone);
   EatsWindowsError = class(Exception);
-
   TParam = record
     Name: string;
     OnOff: Boolean;
   end;
-
   TProjOptions = class(TObject)
   private
     FAutoSaveProject: Boolean;
@@ -87,15 +76,12 @@ type
     property FileName: String read GetFileName
       write SetFileName;
   end;
-
 { TBuildOptions }
-
   TBuildCommand = record
     Command: string;
     Param: string;
     OnOff: Boolean;
   end;
-
   TPlatformConfigBuildOptions = class(TObject)
   private
     FPlatformConfig: string;
@@ -119,7 +105,6 @@ type
     property PlatformConfig: string read FPlatformConfig
       write FPlatformConfig;
   end;
-
   TBuildOptions = class(TObject)
   private
     function ConvertBuildEventStringToIniFormat(
@@ -139,7 +124,6 @@ type
     function ShowDialog(AFileName: String): Boolean;
     function GetPlatformConfigBuildOptions(APlatformConfig: string): TPlatformConfigBuildOptions;
   end;
-
 function PosBack(psSearch, psSource : String):  Integer;
 function PosFrom(psSearch, psSource : String; piStartPos : Integer) : Integer;
 function GetLastWindowsError : String;
@@ -167,23 +151,18 @@ procedure ShowInformation(AMessage: String); overload;
 procedure ShowInformation(const AFormat: string; AParams: array of const); overload;
 procedure ShowWarning(AMessage: String); overload;
 procedure ShowWarning(const AFormat: string; AParams: array of const); overload;
-
 procedure LogText(AText: String); overload;
 procedure LogText(const AFormat: String; AParams: array of const); overload;
 procedure LogException(AException: Exception; AMethod: String = '');
-
 function GetDoneTimeStr(ATime: Double): String;
 function GetDoneNowTimeStr(AStartTime: Double): String;
-
 function ValidatePath(const Path: string): string;
 function ValidateDir(const Dir: string): string;
-
 { Registry Methods }
 procedure AddCustomMacro(AName, AValue: String);
 procedure EditCustomMacro(AName, ANewName, AValue: String);
 procedure DeleteCustomMacro(AName: String);
 function GetCustomMacros: TStringList;
-
 { Open Tools Methods }
 function GetProjectPath: string;
 function ExecuteIDEAction(const ActionName: string): Boolean;
@@ -205,30 +184,24 @@ function GetProjectOptionsNames(AOptions: IOTAOptions;
   AList: TStrings; AIncludeType: Boolean = False): Boolean;
 function QuerySvcs(const Instance: IUnknown;
   const Intf: TGUID; out Inst): Boolean;
-
 function FindMenuItem(MenuCaptions: String): TMenuItem;
-
 const
   C_DEFAULT_FONT_NAME = 'Tahoma';
   C_DEFAULT_FONT_SIZE = 8;
   C_5_MINUTES         = 60000 * 5;
-
 implementation
-
 uses
   {$IFDEF D6_UP} Variants, {$ENDIF}
   IniFiles,
   uBuildOptionsForm,
   Registry,
   PlatformAPI;
-
 const
   REG_MACROS = 'Macros';
   MAX_BUFFER_SIZE = 255;
   MULTI_CHAR = ['*'];
   SINGLE_CHAR = ['?'];
   WILD_CARDS = MULTI_CHAR + SINGLE_CHAR;
-
 {$IFNDEF D6_UP}
 function BoolToStr(ABoolean: Boolean; AUseBoolStrs: Boolean = False): string;
 const
@@ -241,12 +214,10 @@ begin
     Result := cSimpleBoolStrs[ABoolean];
 end;
 {$ENDIF}
-
 function GetProjectPath: string;
 begin
   Result := ValidatePath(ExtractFilePath(GetCurrentProjectFileName));
 end;
-
 procedure LogText(AText: String);
 begin
   {$IFDEF DEBUG_ON}
@@ -254,23 +225,19 @@ begin
   OutputDebugString(PAnsiChar(FormatDateTime('[hh:nn:ss.zzz] ', Time) + AText));
   {$ENDIF}
 end;
-
 procedure LogText(const AFormat: String; AParams: array of const);
 begin
   LogText(Format(AFormat, AParams));
 end;
-
 procedure LogException(AException: Exception; AMethod: String = '');
 begin
   LogText('Exception: %s, occured in %s method', [AException.Message, AMethod]);
 end;
-
 function QuerySvcs(const Instance: IUnknown; const Intf: TGUID;
   out Inst): Boolean;
 begin
   Result := (Instance <> nil) and Supports(Instance, Intf, Inst);
 end;
-
 function GetEnvVar(const AVarName: string): string;
 {$IFNDEF D6_UP}
 var
@@ -286,9 +253,7 @@ begin
 {$ENDIF}
   Result := Trim(Result);
 end;
-
 function GetProjectGroup: IOTAProjectGroup;
-
 var
    IModuleServices: IOTAModuleServices;
    IModule: IOTAModule;
@@ -312,7 +277,6 @@ begin
       end;
 
 end;
-
 function GetActiveProjectOptions(AProject: IOTAProject = nil): IOTAProjectOptions;
 begin
   Result := nil;
@@ -327,7 +291,6 @@ begin
       Result := AProject.ProjectOptions;
   end;
 end;
-
 function GetProjectOptionsNames(AOptions: IOTAOptions; AList: TStrings;
   AIncludeType: Boolean = False): Boolean;
 var
@@ -339,9 +302,7 @@ begin
   Names := nil;
   if not Assigned(AOptions) then
     AOptions := GetActiveProjectOptions(nil);
-
   if not Assigned(AOptions) then Exit;
-
   Names := AOptions.GetOptionNames;
   try
     for I := Low(Names) to High(Names) do
@@ -355,7 +316,6 @@ begin
     Result := AList.Count > 0;
   end;
 end;
-
 function GetProjectGroupFileName: string;
 var
   IModuleServices: IOTAModuleServices;
@@ -366,7 +326,6 @@ begin
   Result := '';
   IModuleServices := BorlandIDEServices as IOTAModuleServices;
   if IModuleServices = nil then Exit;
-
   IProjectGroup := nil;
   for i := 0 to IModuleServices.ModuleCount - 1 do
   begin
@@ -379,9 +338,7 @@ begin
   if IProjectGroup <> nil then
     Result := IModule.FileName;
 end;
-
 function GetCurrentProject: IOTAProject;
-
 var
    Project: IOTAProject;
    ProjectGroup: IOTAProjectGroup;
@@ -405,7 +362,6 @@ begin
       end;
 
 end;
-
 function GetProject: IOTAProject;
 var
   ModuleServices: IOTAModuleServices;
@@ -421,24 +377,19 @@ begin
       if Supports(Module, IOTAProject, Result) then
         Break;
     end;
-
 end;
-
 function GetCurrentProjectFileName: string;
 var
   IProject: IOTAProject;
 begin
   Result := '';
-
   IProject := GetCurrentProject;
   if Assigned(IProject) then
   begin
     Result := IProject.FileName;
   end;
 end;
-
 function FindMenuItem(MenuCaptions: String): TMenuItem;
-
 var
    Captions: TStringList;
    NTAServices: INTAServices;
@@ -446,7 +397,6 @@ var
    MenuItems: TMenuItem;
    Caption: String;
    Found: Boolean;
-
 begin
 
    Result := nil;
@@ -503,7 +453,6 @@ var
   EditorServices: IOTAEditorServices;
 begin
   Result := nil;
-
   EditorServices := BorlandIDEServices as IOTAEditorServices;
   if not Assigned(EditorServices) then Exit;
   if not Assigned(EditorServices.TopView) then Exit;
@@ -512,7 +461,6 @@ begin
   Result := (EditorServices.TopView.GetEditWindow.Form.FindComponent(
     'EditorLocalMenu') as TPopupMenu);
 end;
-
 function FindIDEAction(const ActionName: string): TContainedAction;
 var
   Svcs: INTAServices;
@@ -521,7 +469,6 @@ var
 begin
   Result := nil;
   if ActionName = '' then Exit;
-
   QuerySvcs(BorlandIDEServices, INTAServices, Svcs);
   ActionList := Svcs.ActionList;
   for i := 0 to ActionList.ActionCount - 1 do
@@ -531,7 +478,6 @@ begin
       Exit;
     end;
 end;
-
 function ExecuteIDEAction(const ActionName: string): Boolean;
 var
   Action: TContainedAction;
@@ -542,7 +488,6 @@ begin
   else
     Result := False;
 end;
-
 function GetIDEMainMenu: TMainMenu;
 var
   Svcs40: INTAServices40;
@@ -550,7 +495,6 @@ begin
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := Svcs40.MainMenu;
 end;
-
 // Usage: GetIDEMenuItem('Tools')
 function GetIDEMenuItem(AName: String): TMenuItem;
 var
@@ -569,9 +513,7 @@ begin
       end
   end;
 end;
-
 function GetCurrentProjectName: String;
-
 var
    Project: IOTAProject;
    ProjectGroup: IOTAProjectGroup;
@@ -595,7 +537,6 @@ begin
       end;
 
 end;
-
 procedure SafeFreeAndNil(var AObject: TControl);
 begin
   try
@@ -603,11 +544,9 @@ begin
       FreeAndNil(AObject);
   except end;
 end;
-
 function ValidatePath(const Path: string): string;
 begin
   Result := Trim(Path);
-
   {$IFDEF D6_UP}
     Result := ExcludeTrailingPathDelimiter(Result);
     Result := IncludeTrailingPathDelimiter(Result);
@@ -615,10 +554,8 @@ begin
     Result := ExcludeTrailingBackslash(Result);
     Result := IncludeTrailingBackslash(Result);
   {$ENDIF}
-
   Result := StringReplace(Result, '\\', '\', [rfReplaceAll]);
 end;
-
 function ValidateDir(const Dir: string): string;
 begin
   Result := ValidatePath(Dir);
@@ -629,24 +566,18 @@ begin
       ExcludeTrailingBackslash(Result);
     {$ENDIF}
 end;
-
 function GetProjectOption(const Name: string): string;
 var
   IProject: IOTAProject;
   IProjectOptions: IOTAProjectOptions;
-
 begin
   Result := '';
-
   IProject := GetCurrentProject;
   if not Assigned(IProject) then Exit;
-
   IProjectOptions := IProject.ProjectOptions;
   if not Assigned(IProjectOptions) then Exit;
-
   Result := VarToStr(IProjectOptions.Values[Name]);
 end;
-
 function GetProjectFileName: string;
 var
   IProject: IOTAProject;
@@ -657,7 +588,6 @@ begin
   else
     Result := '';
 end;
-
 function GetBuildMacroList: TStringList;
 var
   Value: string;
@@ -669,35 +599,23 @@ var
   i: Integer;
   BDSVar: String;
   PG: string;
-
 begin
-
    Result := GetCustomMacros;
-
    Value := ValidateDir(GetEnvVar('BDS'));
-
    if Value = ''
    then
       begin
-
          Value := ValidateDir(ExtractFileDir(ParamStr(0)));
-
          if LowerCase(Copy(Value, Length(Value) - 3, 4)) = '\bin'
          then
             Delete(Value, Length(Value) - 3, 4);
-
       end;
-
    BDSVar := Value;
-
    Result.AddPair('BDS', Value);
-
    Result.AddPair('DEFINES', GetProjectOption('Defines'));
    Result.AddPair('CONFIG', GetCurrentProject.CurrentConfiguration);
-
    PlatformSDKServices := (BorlandIDEServices as IOTAPlatformSDKServices);
    AndroidSDK := PlatformSDKServices.GetDefaultForPlatform(cAndroid32ArmPlatform) as IOTAPlatformSDKAndroid;
-
    Result.AddPair('PLATFORM', GetCurrentProject.CurrentPlatform);
 
    if ProjOptions.FParams[0].OnOff
@@ -708,14 +626,34 @@ begin
 
    Result.AddPair('MultiDex', Value);
 
+   if ProjOptions.FParams[0].OnOff
+   then
+      if ProjOptions.FParams[2].OnOff
+      then
+         Value := '--lib "$(SDKApiLevelPath)\android.jar" --min-api 21'
+      else
+         Value := '--dex --multi-dex'
+   else
+      if ProjOptions.FParams[2].OnOff
+      then
+         Value := '--lib "$(SDKApiLevelPath)\android.jar"'
+      else
+         Value := '--dex';
+
+   Result.AddPair('DexOptions', Value);
+
    Result.AddPair('SDKAaptPath', AndroidSDK.SDKAaptPath);
    Result.AddPair('SDKAndroidPath', AndroidSDK.SDKAndroidPath);
    Result.AddPair('JDKPath', AndroidSDK.JDKPath);
-   Result.AddPair('JavaDxPath', ExtractFileDir(AndroidSDK.SDKAaptPath) + '\dx.bat');
+
+   if ProjOptions.FParams[2].OnOff
+   then
+      Result.AddPair('JavaDxPath', ExtractFileDir(AndroidSDK.SDKAaptPath) + '\d8.bat')
+   else
+      Result.AddPair('JavaDxPath', ExtractFileDir(AndroidSDK.SDKAaptPath) + '\dx.bat');
+
    Result.AddPair('SDKApiLevelPath', AndroidSDK.SDKApiLevel);
-
    Result.AddPair('Path', GetEnvVar('Path'));
-
    Value := GetCurrentProjectFileName;
    Result.AddPair('PROJECTDIR', ValidateDir(ExtractFileDir(Value)));
    Result.AddPair('PROJECTEXT', ExtractFileExt(Value));
@@ -723,28 +661,20 @@ begin
    Result.AddPair('PROJECTNAME', Copy(ExtractFileName(Value), 1,
       Length(ExtractFileName(Value)) - Length(ExtractFileExt(Value))));
    Result.AddPair('PROJECTPATH', Value);
-
    Result.AddPair('SystemRoot', GetEnvVar('SystemRoot'));
-
    Value := ValidateDir(GetEnvVar('TEMP'));
-
    if Value = ''
    then
       Value := ValidateDir(GetEnvVar('TMP'));
-
    Result.AddPair('TEMPDIR', Value);
-
    Result.AddPair('UNITOUTPUTDIR', GetProjectOption('UnitOutputDir'));
    Result.AddPair('WINDIR', GetEnvVar('WINDIR'));
-
    slList := TStringList.Create;
    slList.Delimiter := ';';
    slList.StrictDelimiter := True;
    Value := '';
-
    AssignFile(ProjFile, GetCurrentProjectFileName);
    Reset(ProjFile);
-
    while not Eof(ProjFile) do
       begin
 
@@ -788,7 +718,8 @@ begin
 
                if not ProjOptions.FParams[0].OnOff
                then
-                  Line := StringReplace(Line, '.jar', '-dexed.jar', [rfReplaceAll]);
+
+                  Line := StringReplace(Line, '.jar', '-dexed.jar', [rfReplaceAll]);
 
                if Pos(':', Line) = 0
                then
@@ -807,11 +738,8 @@ begin
    CloseFile(ProjFile);
 
    Result.AddPair('Jars', Value);
-
    slList.DisposeOf;
-
 end;
-
 function IfThen(ACondition: Boolean; ATrueValue, AFalseValue: Variant): Variant;
 begin
   if ACondition then
@@ -819,7 +747,6 @@ begin
   else
     Result := AFalseValue;
 end;
-
 procedure AddCustomMacro(AName, AValue: String);
 begin
   with TRegIniFile.Create(REG_KEY) do
@@ -829,7 +756,6 @@ begin
     Free;
   end;
 end;
-
 procedure EditCustomMacro(AName, ANewName, AValue: String);
 begin
   with TRegIniFile.Create(REG_KEY) do
@@ -840,7 +766,6 @@ begin
     Free;
   end;
 end;
-
 procedure DeleteCustomMacro(AName: String);
 begin
   with TRegIniFile.Create(REG_KEY) do
@@ -850,12 +775,9 @@ begin
     Free;
   end;
 end;
-
 function GetCustomMacros: TStringList;
 begin
-
   Result := TStringList.Create;
-
 //  with TRegIniFile.Create(REG_KEY) do
 //  try
 //    { Custom Macros }
@@ -864,7 +786,6 @@ begin
 //    Free;
 //  end;
 end;
-
 function StringContains(ASource: String; AStringArray: array of string;
   AIgnoreCase: Boolean = True): Boolean;
 var
@@ -879,7 +800,6 @@ begin
     if Result then Break;
   end;
 end;
-
 function ContainsString(ASource: String; AStringArray: array of string;
   AIgnoreCase: Boolean = True): Boolean;
 var
@@ -892,14 +812,12 @@ begin
     for Loop := Low(AStringArray) to High(AStringArray) do
       AStringArray[Loop] := LowerCase(AStringArray[Loop]);
   end;
-
   for Loop := Low(AStringArray) to High(AStringArray) do
   begin
     Result := (Pos(AStringArray[Loop], ASource) > 0);
     if Result then Break;
   end;
 end;
-
 function GetDoneTimeStr(ATime: Double): String;
 begin
   if (ATime * 24 * 60 > 1) then
@@ -907,12 +825,10 @@ begin
   else
     Result := Format('%f ms.', [ATime * 24 * 60 * 60 * 60]);
 end;
-
 function GetDoneNowTimeStr(AStartTime: Double): String;
 begin
   Result := GetDoneTimeStr(Now - AStartTime);
 end;
-
 function PosBack(psSearch, psSource:  String):  Integer;
 var
   blnFound  :  Boolean;
@@ -929,7 +845,6 @@ begin
   if Result < 0 then
     Result := 0;
 end;
-
 function PosFrom(psSearch, psSource:  String; piStartPos: Integer): Integer;
 begin
   Dec(piStartPos);
@@ -940,7 +855,6 @@ begin
   if Result > 0 then
     Result := piStartPos + Result;
 end;
-
 function GetLastWindowsError : String;
 var
   dwrdError          :  DWord;
@@ -956,7 +870,6 @@ begin
     FreeMem(pchrBuffer, MAX_BUFFER_SIZE);
   end;
 end;
-
 function RunProgram(psCmdLine: String;
   AWaitUntil: TWaitOption): TProcessInformation;
 var
@@ -966,7 +879,6 @@ var
   iExitCode      :  Cardinal;
 begin
   sCmdLine := psCmdLine + #0;
-
   with StartInfo do
   begin
     lpReserved := nil;
@@ -976,15 +888,12 @@ begin
     cbReserved2 := 0;
     lpReserved2 := nil;
   end;
-
   StartInfo.cb := SizeOf(StartInfo);
-
   if CreateProcess(nil, PChar(sCmdLine), nil, nil, true, 0, nil, nil,
     StartInfo, Result) then
   begin
     if AWaitUntil in [woUntilStart, woUntilFinish] then
       WaitForInputIdle(Result.hProcess, INFINITE);
-
     if (AWaitUntil = woUntilFinish) then
       repeat
         Application.ProcessMessages;
@@ -996,7 +905,6 @@ begin
     raise EatsWindowsError.Create(sErrorMsg);
   end;
 end;   { RunProgram }
-
 function WildcardCompare(psWildCard, psCompare : String;
   pbCaseSens : Boolean) : Boolean;
 var
@@ -1013,20 +921,17 @@ begin
     psWildCard := UpperCase(psWildCard);
     psCompare := UpperCase(psCompare);
   end;
-
   { If either string is empty, return false immediately. }
   if (psWildCard = '') or (psCompare = '') then
   begin
     Result := false;
     Exit;
   end;
-
   strlstWild := TStringList.Create;
   try
     { ----------------------------------------------------------------------- }
     { First, we split the wildcard string up into sections - text vs wild
       cards with a line in a string list for each.
-
       So, the wildcard "abc*def?ghi" would be broken up into a string list
       like this:
              abc
@@ -1034,7 +939,6 @@ begin
              def
              ?
              ghi
-
       }
     intStart := 1;
     for intCounter := 1 to Length(psWildCard) do
@@ -1061,7 +965,6 @@ begin
       strWork := Copy(psWildCard, intStart, Length(psWildCard));
       strlstWild.Add(strWork);
     end;
-
     Result := true;
     blnAtStart := true;
     intStart := 1;
@@ -1111,7 +1014,6 @@ begin
           else
             Result := false;
          end;
-
         blnAtStart := true;
       end;
       Inc(intCounter);
@@ -1122,7 +1024,6 @@ begin
     strlstWild.Free;
   end;
 end;
-
 function MessageDlgEx(const AMessage: string; AType: TMsgDlgType;
   AButtons: TMsgDlgButtons; AHelpContext: Longint; ADefResult: Word;
   ASeconds: Integer = 10): Word;
@@ -1135,57 +1036,46 @@ begin
     Free;
   end;
 end;
-
 procedure ShowError(AMessage: String);
 begin
   MessageDlgEx(AMessage, mtError, [mbOk], 0, IDOK);
 end;
-
 procedure ShowError(const AFormat: string; AParams: array of const);
 begin
   ShowError(Format(AFormat, AParams));
 end;
-
 procedure ShowWarning(AMessage: String);
 begin
   MessageDlgEx(AMessage, mtWarning, [mbOK], 0, IDOK);
 end;
-
 procedure ShowWarning(const AFormat: string; AParams: array of const);
 begin
   ShowError(Format(AFormat, AParams));
 end;
-
 procedure ShowInformation(ACaption, AMessage: String);
 begin
   MessageBox(0, PChar(AMessage), PChar(ACaption),
     MB_OK or MB_ICONEXCLAMATION);
 end;
-
 procedure ShowInformation(AMessage: String);
 begin
   MessageDlgEx(AMessage, mtInformation, [mbOK], 0, IDOK);
 end;
-
 procedure ShowInformation(const AFormat: string; AParams: array of const);
 begin
   ShowInformation(Format(AFormat, AParams));
 end;
-
 function GetConfirmation(AMessage: String): Boolean;
 begin
   Result :=
     MessageDlgEx(AMessage, mtConfirmation, [mbYes, mbNo], 0, IDNO) = IDYES;
 end;
-
 function GetConfirmation(const AFormat: string;
   AParams: array of const): Boolean;
 begin
   Result := GetConfirmation(Format(AFormat, AParams));
 end;
-
 { TAutoCloseMessage }
-
 constructor TAutoCloseMessage.Create(const AMessage: string; AType: TMsgDlgType;
   AButtons: TMsgDlgButtons; AHelpContext: Longint; ADefResult: Word;
   ASeconds: Integer = 10);
@@ -1205,19 +1095,16 @@ begin
     InitTimer(ASeconds);
   end;
 end;
-
 destructor TAutoCloseMessage.Destroy;
 begin
   FreeResources;
   inherited;
 end;
-
 procedure TAutoCloseMessage.DoOnTimerTick(Sender: TObject);
 begin
   Dec(FInterval);
   FLabelTime.Caption := Format('%.2d', [FInterval]);
   FLabelTime.Refresh;
-
   if (FInterval <= 0) then
   begin
     (Sender as TTimer).Enabled := False;
@@ -1226,7 +1113,6 @@ begin
     FForm.Close;
   end;
 end;
-
 procedure TAutoCloseMessage.InitLabel(ASeconds: Integer);
 begin
   FLabel:= TLabel.Create(FForm);
@@ -1237,7 +1123,6 @@ begin
   FLabel.Font.Style := [fsItalic];
   FLabel.Left := 6;
   FLabel.Top := FForm.ClientHeight - 16;
-
   FLabelTime:= TLabel.Create(FForm);
   FLabelTime.Parent := FForm;
   FLabelTime.Caption := Format('%.2d', [FInterval]);
@@ -1245,12 +1130,10 @@ begin
   FLabelTime.Font.Style := [fsItalic];
   FLabelTime.Left := FLabel.Left + FLabel.Width - 29;
   FLabelTime.Top := FLabel.Top;
-
   if (FForm.Width < 260) then FForm.Width := 260;
   FLabel.Visible := True;
   FLabelTime.Visible := True;
 end;
-
 procedure TAutoCloseMessage.InitTimer(ASeconds: Integer);
 begin
   FTimer := TTimer.Create(FForm);
@@ -1258,7 +1141,6 @@ begin
   FTimer.OnTimer := DoOnTimerTick;
   FTimer.Enabled := True;
 end;
-
 function TAutoCloseMessage.ResultStr(AIndex: Integer): String;
 const
   CReturnStr: array[0..10] of string = ('mrNone', 'mrOk', 'mrCancel', 'mrAbort',
@@ -1269,7 +1151,6 @@ begin
   else
     Result := 'Unknown';
 end;
-
 procedure TAutoCloseMessage.SetDefaultButton(AButtons: TMsgDlgButtons);
 var
   I: Integer;
@@ -1282,14 +1163,12 @@ begin
     	 if (AButtons = mbYesNoCancel) then FResult := mrNo;
       if (AButtons = mbAbortRetryIgnore) then FResult := mrIgnore;
     end;
-
     for I := 0 to FForm.ComponentCount -1 do
     begin
       if (FForm.Components[I] is TButton) then
       begin
         //with FForm.Components[I] as TButton do ShowMessageFmt(
         //  '%s - %d - Default: %s', [Caption, ModalResult, ResultStr(FResult)]);
-
         if (TButton(FForm.Components[I]).ModalResult = FResult) then
         begin
           FForm.ActiveControl := TButton(FForm.Components[I]);
@@ -1299,57 +1178,48 @@ begin
     end;
   end;
 end;
-
 procedure TAutoCloseMessage.DoOnDialogShow(Sender: TObject);
 begin
   if Assigned(FForm) then
     AnimateWindow(FForm.Handle, 200, AW_CENTER or AW_ACTIVATE);
 end;
-
 procedure TAutoCloseMessage.DoOnDialogClose(Sender: TObject;
   var Action: TCloseAction);
 begin
   if Assigned(FForm) then
     AnimateWindow(FForm.Handle, 200, AW_CENTER or AW_HIDE);
 end;
-
 procedure TAutoCloseMessage.FreeResources;
 begin
-
   if Assigned(FTimer)
   then
      begin
         FTimer.DisposeOf;
         FTimer := nil;
      end;
-
   if Assigned(FLabelTime)
   then
      begin
         FLabelTime.DisposeOf;
         FLabelTime := nil;
      end;
-
   if Assigned(FLabel)
   then
      begin
         FLabel.DisposeOf;
         FLabel := nil;
      end;
-
   if Assigned(FForm)
   then
      begin
         FForm.DisposeOf;
         FForm := nil;
      end;
-
 //  SafeFreeAndNil(FTimer);
 //  SafeFreeAndNil(FLabelTime);
 //  SafeFreeAndNil(FLabel);
 //  SafeFreeAndNil(FForm);
 end;
-
 function TAutoCloseMessage.Execute: Word;
 begin
  if Assigned(FForm) then
@@ -1362,35 +1232,25 @@ begin
  end else
    Result := FResult;
 end;
-
 { TBuildOptions }
-
 constructor TBuildOptions.Create;
 begin
   inherited Create;
   FPlatformConfigBuildOptions := TList<TPlatformConfigBuildOptions>.Create;
 end;
-
 destructor TBuildOptions.Destroy;
-
 var
    i: Integer;
-
 begin
-
   for i := FPlatformConfigBuildOptions.Count - 1 downto 0 do
      begin
         FPlatformConfigBuildOptions[i].FPreBuildEvents.DisposeOf;
         FPlatformConfigBuildOptions[i].FPostBuildEvents.DisposeOf;
         FPlatformConfigBuildOptions.Delete(i);
      end;
-
   FPlatformConfigBuildOptions.DisposeOf;
-
   inherited;
-
 end;
-
 function TBuildOptions.GetPlatformConfigBuildOptions(
   APlatformConfig: string): TPlatformConfigBuildOptions;
 
@@ -1415,141 +1275,99 @@ begin
 end;
 
 procedure TProjOptions.Load(SourceFile: String);
-
 var
    Params: TStringList;
    i: Integer;
    ParmR: TParam;
-
 begin
-
    with TIniFile.Create(SourceFile) do
    try
-
       FAutoSaveProject := ReadBool('ProjOptions', 'AutoSave', False);
       FAutoSaveInterval := ReadInteger('ProjOptions', 'Interval', C_5_MINUTES);
-
       Params := TStringList.Create;
       Params.Delimiter := '¤';
       Params.StrictDelimiter := True;
-      Params.DelimitedText := ReadString('ProjOptions', 'Params', 'MultiDex;False¤RunDex;True');
-
+      Params.DelimitedText := ReadString('ProjOptions', 'Params', 'MultiDex;False¤RunDex;True¤D8;False');
       FParams.Clear;
-
       for i := 0 to Params.Count - 1 do
          begin
             ParmR.Name := StrBefore(';', Params[i]);
             ParmR.OnOff := StrToBool(StrAfter(';', Params[i]));
             FParams.Add(ParmR);
          end;
-
       Params.DisposeOf;
-
    finally
       Free;
    end;
-
 end;
-
 procedure TProjOptions.Save;
-
 var
    i: integer;
    TmpStr: String;
-
 begin
 
    with TIniFile.Create(FileName) do
    try
-
       WriteBool('ProjOptions', 'AutoSave', FAutoSaveProject);
       WriteInteger('ProjOptions', 'Interval', FAutoSaveInterval);
-
       TmpStr := '';
-
       for i := 0 to FParams.Count - 1 do
          if TmpStr = ''
          then
             TmpStr := FParams[i].Name + ';' + BoolToStr(FParams[i].OnOff, True)
          else
             TmpStr := TmpStr + '¤' + FParams[i].Name + ';' + BoolToStr(FParams[i].OnOff, True);
-
       WriteString('ProjOptions', 'Params', TmpStr);
-
    finally
       Free;
    end;
-
 end;
 
 function TBuildOptions.ConvertBuildEventStringToIniFormat(
   Commands: TList<TBuildCommand>): string;
-
 var
    Index: Integer;
    TmpStr: String;
-
 begin
-
    Result := '';
-
    for Index := 0 to Commands.Count - 1 do
       begin
-
          TmpStr := Trim(Commands[Index].Command) + '¤' + Commands[Index].Param + '¤' + BoolToStr(Commands[Index].OnOff, True);
-
          if Result = ''
          then
             Result := TmpStr
          else
             Result := Result + '|' + TmpStr;
-
       end;
-
 end;
-
 procedure TBuildOptions.ConvertIniFormatStringToBuildEvent(const Text: string;
   var Commands: TList<TBuildCommand>);
-
 var
    i: Integer;
    Event: TBuildCommand;
    InpStrings: TStringList;
    CommandStr: TStringList;
-
 begin
-
    Commands.Clear;
-
    InpStrings := TStringList.create;
    InpStrings.Delimiter := '|';
    InpStrings.StrictDelimiter := True;
    InpStrings.DelimitedText := Text;
-
    CommandStr := TStringList.create;
    CommandStr.Delimiter := '¤';
    CommandStr.StrictDelimiter := True;
-
    for i := 0 to InpStrings.Count - 1 do
       begin
-
          CommandStr.DelimitedText := InpStrings[i];
-
          Event.Command := CommandStr[0];
          Event.Param := CommandStr[1];
          Event.OnOff := StrToBool(CommandStr[2]);
-
          Commands.Add(Event);
-
       end;
-
    InpStrings.DisposeOf;
    CommandStr.DisposeOf;
-
 end;
-
 procedure TBuildOptions.CopyProjectEvents(const ASourceFile: string);
-
 var
    i: Integer;
    PlatForms: TArray<string>;
@@ -1557,81 +1375,55 @@ var
    PlatformConfigBuildOptions: TPlatformConfigBuildOptions;
    TmpPreBuildEvents : TList<TBuildCommand>;
    TmpPostBuildEvents : TList<TBuildCommand>;
-
 begin
-
   LogText('TBuildOptions.CopyProjectEvents(ASourceFile: %s)', [ASourceFile]);
-
   ClearEvents;
   ProjOptions.Load(ASourceFile);
-
   CurrentProject := GetCurrentProject;
   PlatForms := CurrentProject.SupportedPlatforms;
-
   TmpPreBuildEvents := TList<TBuildCommand>.Create;
   TmpPostBuildEvents := TList<TBuildCommand>.Create;
-
    with TIniFile.Create(ASourceFile) do
    begin
-
       try
-
        for i := 0 to Length(PlatForms) - 1 do
           begin
-
              PlatformConfigBuildOptions := TPlatformConfigBuildOptions.Create;
              PlatformConfigBuildOptions.FPlatformConfig := PlatForms[i] + 'Debug';
              ConvertIniFormatStringToBuildEvent(Trim(ReadString(
                 PlatForms[i] + 'Debug', 'PreBuild', '')), TmpPreBuildEvents);
              ConvertIniFormatStringToBuildEvent(Trim(ReadString(
                 PlatForms[i] + 'Debug', 'PostBuild', '')), TmpPostBuildEvents);
-
              PlatformConfigBuildOptions.PreBuildEnabled := ReadBool(PlatForms[i] + 'Debug', 'PreBuildEnabled', False);
              PlatformConfigBuildOptions.PostBuildEnabled:= ReadBool(PlatForms[i] + 'Debug', 'PostBuildEnabled', False);
-
              PlatformConfigBuildOptions.PostBuildOption := TPostBuildOption(ReadInteger(
                 PlatForms[i] + 'Debug', 'BuildEvent', 0));
-
              PlatformConfigBuildOptions.PreBuildEvents.AddRange(TmpPreBuildEvents);
              PlatformConfigBuildOptions.PostBuildEvents.AddRange(TmpPostBuildEvents);
-
              FPlatformConfigBuildOptions.Add(PlatformConfigBuildOptions);
-
              PlatformConfigBuildOptions := TPlatformConfigBuildOptions.Create;
              PlatformConfigBuildOptions.FPlatformConfig := PlatForms[i] + 'Release';
              ConvertIniFormatStringToBuildEvent(Trim(ReadString(
                 PlatForms[i] + 'Release', 'PreBuild', '')), TmpPreBuildEvents);
              ConvertIniFormatStringToBuildEvent(Trim(ReadString(
                 PlatForms[i] + 'Release', 'PostBuild', '')), TmpPostBuildEvents);
-
              PlatformConfigBuildOptions.PreBuildEnabled := ReadBool(PlatForms[i] + 'Release', 'PreBuildEnabled', False);
              PlatformConfigBuildOptions.PostBuildEnabled:= ReadBool(PlatForms[i] + 'Release', 'PostBuildEnabled', False);
-
              PlatformConfigBuildOptions.PostBuildOption := TPostBuildOption(ReadInteger(
                 PlatForms[i] + 'Release', 'BuildEvent', 0));
-
              PlatformConfigBuildOptions.PreBuildEvents.AddRange(TmpPreBuildEvents);
              PlatformConfigBuildOptions.PostBuildEvents.AddRange(TmpPostBuildEvents);
-
              FPlatformConfigBuildOptions.Add(PlatformConfigBuildOptions);
-
           end;
-
         TmpPreBuildEvents.DisposeOf;
         TmpPostBuildEvents.DisposeOf;
-
         LogText('%s - Loaded', [ASourceFile]);
-
       finally
         Free;
       end;
-
    end;
-
   LogText('TBuildOptions.CopyProjectEvents(ASourceFile: %s)', [ASourceFile]);
-
 end;
-
 procedure TBuildOptions.LoadProjectEvents(const NewFileName: string);
 begin
   ClearEvents;
@@ -1641,21 +1433,15 @@ begin
   CopyProjectEvents(ProjOptions.FileName);
   LogText('TBuildOptions.LoadProjectEvents(NewFileName: %s)', [ProjOptions.FileName]);
 end;
-
 procedure TBuildOptions.SaveProjectEvents(const FileCheck: Boolean);
-
 var
    i: Integer;
-
 begin
-
   LogText('TBuildOptionExpert.SaveProjectEvents (FileCheck: %s)',
     [BoolToStr(FileCheck, True)]);
-
    if ProjOptions.FileName <> ''
    then
       begin
-
          if FileCheck
          then
             if not FileExists(ProjOptions.FileName) then
@@ -1663,13 +1449,10 @@ begin
                LogText('%s - File Not Found!', [ProjOptions.FileName]);
                Exit;
             end;
-
          with TIniFile.Create(ProjOptions.FileName) do
          try
-
             for i := 0 to FPlatformConfigBuildOptions.Count - 1 do
                begin
-
                   WriteString(FPlatformConfigBuildOptions[i].FPlatformConfig, 'PreBuild',
                      ConvertBuildEventStringToIniFormat(FPlatformConfigBuildOptions[i].PreBuildEvents));
                   WriteString(FPlatformConfigBuildOptions[i].FPlatformConfig, 'PostBuild',
@@ -1677,28 +1460,20 @@ begin
                   WriteInteger(FPlatformConfigBuildOptions[i].FPlatformConfig, 'BuildEvent', Integer(FPlatformConfigBuildOptions[i].PostBuildOption));
                   WriteBool(FPlatformConfigBuildOptions[i].FPlatformConfig, 'PreBuildEnabled', FPlatformConfigBuildOptions[i].PreBuildEnabled);
                   WriteBool(FPlatformConfigBuildOptions[i].FPlatformConfig, 'PostBuildEnabled', FPlatformConfigBuildOptions[i].PostBuildEnabled);
-
                end;
-
             LogText('%s - File Saved', [ProjOptions.FileName]);
-
          finally
             Free;
          end;
-
       end;
-
    LogText('TBuildOptionExpert.SaveProjectEvents (FileCheck: %s)',
     [BoolToStr(FileCheck, True)]);
-
 end;
-
 function TBuildOptions.ShowDialog(AFileName: String): Boolean;
 begin
    LoadProjectEvents(AFileName);
    Result := BuildOptionsForm.Execute(Self);
 end;
-
 procedure TProjOptions.SetFileName(const Value: string);
 var
   FileExt: string;
@@ -1707,57 +1482,42 @@ begin
     [FFileName, Value]);
   if FFileName <> Value then
   begin
-
     if Value <> ''
     then
        begin
-
           FileExt := LowerCase(ExtractFileExt(Value));
           if FileExt <> '.ini' then
             FFileName := ChangeFileExt(Value, '.ini')
           else
             FFileName := Value;
-
        end
     else
        FFileName := '';
-
   end;
   LogText('Out - TBuildOptions.SetFileName: Value=%s, FileName=%s',
     [FFileName, Value]);
 end;
-
 procedure TBuildOptions.SaveAll;
 begin
   LogText('In - TBuildOptions.SaveAll');
   SaveProjectEvents;
   LogText('Out - TBuildOptions.SaveAll');
 end;
-
 procedure TBuildOptions.ClearEvents;
-
 var
    i: Integer;
-
 begin
-
   ProjOptions.FileName := '';
-
   LogText('In - TBuildOptions.ClearEvents');
-
   for i := FPlatformConfigBuildOptions.Count - 1 downto 0 do
      begin
         FPlatformConfigBuildOptions[i].FPreBuildEvents.DisposeOf;
         FPlatformConfigBuildOptions[i].FPostBuildEvents.DisposeOf;
         FPlatformConfigBuildOptions.Delete(i);
      end;
-
   FPlatformConfigBuildOptions.Clear;
-
   LogText('Out - TBuildOptions.ClearEvents');
-
 end;
-
 constructor TProjOptions.Create;
 begin
    FParams := TList<TParam>.Create;
@@ -1781,7 +1541,6 @@ begin
   end;
   LogText('TBuildOptions.GetFileName(Result: %s)', [Result]);
 end;
-
 function TProjOptions.GetParam(Name: String): TParam;
 
 var
@@ -1803,13 +1562,11 @@ begin
   ClearEvents;
   LogText('Out - TBuildOptions.Reset(FileName: %s)', [ProjOptions.FileName]);
 end;
-
 constructor TPlatformConfigBuildOptions.Create;
 begin
 
    FPreBuildEvents := TList<TBuildCommand>.Create;
    FPostBuildEvents :=  TList<TBuildCommand>.Create;
-
 end;
 
 //procedure TPlatformConfigBuildOptions.SetPostBuildEvents(AValue: TStringList);
@@ -1821,5 +1578,4 @@ end;
 //begin
 //  FPreBuildEvents.Assign(AValue);
 //end;
-
 end.

@@ -4,7 +4,7 @@ object BuildOptionsForm: TBuildOptionsForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Build Events'
-  ClientHeight = 549
+  ClientHeight = 580
   ClientWidth = 575
   Color = 3288877
   Font.Charset = DEFAULT_CHARSET
@@ -17,14 +17,14 @@ object BuildOptionsForm: TBuildOptionsForm
   OnCreate = FormCreate
   DesignSize = (
     575
-    549)
+    580)
   PixelsPerInch = 96
   TextHeight = 13
   object AdvGroupBox1: TAdvGroupBox
     Left = 0
     Top = 0
     Width = 575
-    Height = 489
+    Height = 517
     BorderColor = clBlue
     Align = alTop
     Caption = 'Pre / Post -Build Events'
@@ -37,7 +37,7 @@ object BuildOptionsForm: TBuildOptionsForm
     TabOrder = 0
     object lblSize: TLabel
       Left = 381
-      Top = 449
+      Top = 477
       Width = 33
       Height = 16
       Caption = 'Si&ze :'
@@ -52,8 +52,8 @@ object BuildOptionsForm: TBuildOptionsForm
       FocusControl = SpinEditSize
     end
     object Label2: TLabel
-      Left = 5
-      Top = 107
+      Left = 3
+      Top = 135
       Width = 48
       Height = 16
       Caption = 'Platform'
@@ -61,7 +61,7 @@ object BuildOptionsForm: TBuildOptionsForm
     end
     object Label3: TLabel
       Left = 286
-      Top = 107
+      Top = 135
       Width = 76
       Height = 16
       Caption = 'Configuration'
@@ -69,7 +69,7 @@ object BuildOptionsForm: TBuildOptionsForm
     end
     object Label4: TLabel
       Left = 3
-      Top = 448
+      Top = 476
       Width = 116
       Height = 16
       Caption = 'Build Messages Font'
@@ -77,24 +77,24 @@ object BuildOptionsForm: TBuildOptionsForm
     end
     object Label5: TLabel
       Left = 3
-      Top = 422
+      Top = 450
       Width = 118
       Height = 16
       Caption = 'Run Postbuild Events'
       FocusControl = SpinEditSize
     end
     object CLBParams: TCheckListBox
-      Left = 5
-      Top = 48
+      Left = 3
+      Top = 50
       Width = 553
-      Height = 53
+      Height = 75
       Color = 3288877
       PopupMenu = PUParams
       TabOrder = 4
     end
     object SpinEditSize: TSpinEdit
       Left = 420
-      Top = 449
+      Top = 477
       Width = 50
       Height = 26
       Hint = 'Font Size'
@@ -107,7 +107,7 @@ object BuildOptionsForm: TBuildOptionsForm
     end
     object CBPlatForms: TComboBox
       Left = 5
-      Top = 128
+      Top = 156
       Width = 275
       Height = 24
       BevelEdges = []
@@ -117,10 +117,11 @@ object BuildOptionsForm: TBuildOptionsForm
       TabOrder = 2
       OnChange = CBPlatFormsChange
       OnDropDown = CBPlatFormsDropDown
+      OnSelect = CBPlatFormsSelect
     end
     object CBConfig: TComboBox
       Left = 286
-      Top = 128
+      Top = 156
       Width = 275
       Height = 24
       BevelEdges = []
@@ -130,13 +131,14 @@ object BuildOptionsForm: TBuildOptionsForm
       TabOrder = 0
       OnChange = CBConfigChange
       OnDropDown = CBConfigDropDown
+      OnSelect = CBConfigSelect
       Items.Strings = (
         'Debug'
         'Release')
     end
     object cbFontNames: TComboBox
       Left = 125
-      Top = 446
+      Top = 474
       Width = 250
       Height = 24
       BevelEdges = []
@@ -147,7 +149,7 @@ object BuildOptionsForm: TBuildOptionsForm
     end
     object cbPostBuildEvents: TComboBox
       Left = 125
-      Top = 418
+      Top = 446
       Width = 250
       Height = 24
       BevelEdges = []
@@ -163,7 +165,7 @@ object BuildOptionsForm: TBuildOptionsForm
     end
     object TSPostBuild: TToggleSwitch
       Left = 5
-      Top = 288
+      Top = 316
       Width = 175
       Height = 20
       Color = 3288877
@@ -183,7 +185,7 @@ object BuildOptionsForm: TBuildOptionsForm
     end
     object TSPrebuild: TToggleSwitch
       Left = 5
-      Top = 160
+      Top = 188
       Width = 167
       Height = 20
       Color = 3288877
@@ -203,7 +205,7 @@ object BuildOptionsForm: TBuildOptionsForm
     end
     object ACGPostbuild: TStringGrid
       Left = 5
-      Top = 310
+      Top = 338
       Width = 559
       Height = 95
       BevelInner = bvNone
@@ -233,8 +235,8 @@ object BuildOptionsForm: TBuildOptionsForm
       OnDrawCell = ACGPostbuildDrawCell
     end
     object ACGPreBuild: TStringGrid
-      Left = 5
-      Top = 183
+      Left = 3
+      Top = 214
       Width = 559
       Height = 95
       BevelInner = bvNone
@@ -285,8 +287,8 @@ object BuildOptionsForm: TBuildOptionsForm
     ThumbColor = clGreen
   end
   object BSave: TButton
-    Left = 129
-    Top = 508
+    Left = 136
+    Top = 539
     Width = 75
     Height = 25
     Anchors = [akTop]
@@ -302,8 +304,8 @@ object BuildOptionsForm: TBuildOptionsForm
     OnClick = BSaveClick
   end
   object btnCancel: TButton
-    Left = 356
-    Top = 508
+    Left = 363
+    Top = 539
     Width = 75
     Height = 25
     Anchors = [akTop]
@@ -319,8 +321,8 @@ object BuildOptionsForm: TBuildOptionsForm
     TabStop = False
   end
   object btnLoad: TButton
-    Left = 205
-    Top = 508
+    Left = 212
+    Top = 539
     Width = 75
     Height = 25
     Anchors = [akTop]
@@ -336,8 +338,8 @@ object BuildOptionsForm: TBuildOptionsForm
     OnClick = btnLoadClick
   end
   object btnOK: TButton
-    Left = 281
-    Top = 508
+    Left = 288
+    Top = 539
     Width = 75
     Height = 25
     Anchors = [akTop]
@@ -394,8 +396,8 @@ object BuildOptionsForm: TBuildOptionsForm
   end
   object PUParams: TPopupMenu
     OnPopup = PUParamsPopup
-    Left = 290
-    Top = 312
+    Left = 292
+    Top = 314
     object AddParam1: TMenuItem
       Caption = 'Add Parameter'
       OnClick = AddParam1Click

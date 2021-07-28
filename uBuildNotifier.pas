@@ -3,17 +3,12 @@
 { ******* Written by Kiran Kurapaty (kuraki@morganstanley.com) ********* }
 { ********************************************************************** }
 unit uBuildNotifier;
-
 interface
-
 {$I BuildEvents.inc}
-
 uses
   Windows, SysUtils, Controls, Graphics, Classes, Menus, ActnList, ToolsAPI,
   Dialogs, Forms;
-
 type
-
   TProjectCompileNotifier = class(TInterfacedObject, IOTAProjectCompileNotifier)
   protected
     procedure AfterCompile(var CompileInfo: TOTAProjectCompileInfo);
@@ -28,26 +23,21 @@ type
     procedure ProjectGroupCompileStarted(Mode: TOTACompileMode);
     procedure ProjectGroupCompileFinished(Result: TOTACompileResult);
   end;
-
 implementation
-
 uses
   uBuildEngine,
   uBuildOptionExpert,
   uBuildMisc;
-
 const
-
   C_OTA_FILE_NOTIFICATION_STR : array [TOTAFileNotification] of String = (
     'ofnFileOpening', 'ofnFileOpened', 'ofnFileClosing',
     'ofnDefaultDesktopLoad', 'ofnDefaultDesktopSave', 'ofnProjectDesktopLoad',
     'ofnProjectDesktopSave', 'ofnPackageInstalled', 'ofnPackageUninstalled',
-    'ofnActiveProjectChanged', 'ofnProjectOpenedFromTemplate'); //,
-//    'ofnBeginProjectGroupOpen', 'ofnEndProjectGroupOpen', 'ofnBeginProjectGroupClose',
-//    'ofnEndProjectGroupClose');
+    'ofnActiveProjectChanged', 'ofnProjectOpenedFromTemplate',
+    'ofnBeginProjectGroupOpen', 'ofnEndProjectGroupOpen', 'ofnBeginProjectGroupClose',
+    'ofnEndProjectGroupClose');
 
 { TBuildNotifier }
-
 var
    ProjCompNot: integer;
    Intf: IOTAProjectCompileNotifier;

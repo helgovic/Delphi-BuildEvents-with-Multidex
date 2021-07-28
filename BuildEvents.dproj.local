@@ -4,6 +4,6 @@
 		<NoProfile Android64="029d38577d23"/>
 	</ActiveMobileDevice>
 	<Transactions>
-    <Transaction>1899-12-30 00:00:00.000.226,D:\Downloads\Delphi\mORMotBP-master\mORMotBP-master\Tools\BuildEventsClean\Sources\BuildEvents.dproj=D:\Downloads\Delphi\mORMotBP-master\mORMotBP-master\Tools\BuildEventsClean\Sources\BuildEventsD2006.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.226,D:\Downloads\Delphi\mORMotBP-master\mORMotBP-master\Tools\BuildEventsClean\Sources\BuildEventsD2006.dproj=D:\Downloads\Delphi\mORMotBP-master\mORMotBP-master\Tools\BuildEventsClean\Sources\BuildEvents.dproj</Transaction>
   </Transactions>
 </BorlandProject>

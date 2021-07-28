@@ -1,13 +1,9 @@
 unit uBuildOptionExpert;
-
 interface
-
 {$I BuildEvents.inc}
-
 uses
   Windows, SysUtils, Graphics, Classes, Menus, ActnList, ToolsAPI, Dialogs,
-  Forms, ComCtrls, Contnrs, ExtCtrls, uBuildMisc, Xml.XMLIntf;
-
+  Forms, ComCtrls, Contnrs, ExtCtrls, uBuildMisc, Xml.XMLIntf, System.IniFiles;
 type
   { This is an enumerater for the message types that we will display }
   TMessageType = (mtInfo, mtWarning, mtError, mtSuccess, mtDebug, mtCustom);
@@ -15,12 +11,10 @@ type
   TClearMessage = (cmBuildEvents, cmCompiler, cmSearch, cmTool, cmAll);
   { This is a set of messages that can be cleared. }
   TClearMessages = Set of TClearMessage;
-
   TBADIToolsAPIFunctions = record
      Class Procedure RegisterFormClassForTheming(Const AFormClass : TCustomFormClass;
         Const Component : TComponent = Nil); static;
   end;
-
   TBuildOptionExpert = class(TObject)
   private
     { Private declarations }
@@ -41,7 +35,6 @@ type
     {$ENDIF}
     function GetModuleName: String;
     function GetProjectName: String;
-
     function AddAction(ACaption, AHint, AName : String; AExecuteEvent,
       AUpdateEvent : TNotifyEvent) : TAction;
     procedure RemoveAction(AAction: TAction; AToolbar: TToolbar);
@@ -55,7 +48,6 @@ type
     constructor Create; virtual;
     destructor Destroy; override;
     class function Instance: TBuildOptionExpert;
-
     procedure AddMessage(AText: String; AForeColour: TColor;
       AStyle: TFontStyles; ABackColour: TColor = clWindow);
     procedure AddMessageTitle(AType: TMessageType; AText: String);
@@ -68,10 +60,8 @@ type
       AParams: array of const); overload;
     procedure LogMessages(AType: TMessageType; AStrings : TStrings);
     procedure TriggerPostBuildEvent(ASuccess: Boolean);
-
     { Action Event Handlers }
     procedure MenuOptionsExecute(Sender : TObject);
-
     { Property declarations }
     property Options : TBuildOptions read FOptions;
     property ModuleName: String read GetModuleName;
@@ -88,51 +78,39 @@ type
     property FontSize: Integer read FFontSize Write FFontSize;
     property FontName: String read FFontName Write FFontName;
   end;
-
   function BuildOptionExpert: TBuildOptionExpert;
-
 implementation
-
 uses Registry, System.IOUtils, JCLStrings, Controls, uBuildNotifier, uBuildEngine, uBuildMessages,
      uBuildOptionsForm, UBuildEventStat, DeploymentAPI;
-
 const
   clAmber = TColor($004094FF);
   C_MESSAGE_TYPE_COLOUR : array [TMessageType] of TColor =
     (clBlue, clAmber, clRed, clGreen, clPurple, clBlack);
-
 var
   FBuildOptionExpert: TBuildOptionExpert;
   CompNot: Integer;
-
 { TBuildOptionExpert }
 function BuildOptionExpert: TBuildOptionExpert;
 begin
   Result := TBuildOptionExpert.Instance;
 end;
-
 class function TBuildOptionExpert.Instance: TBuildOptionExpert;
 begin
   if FBuildOptionExpert = nil then
     FBuildOptionExpert := TBuildOptionExpert.Create;
   Result := FBuildOptionExpert;
 end;
-
 constructor TBuildOptionExpert.Create;
-
 var
    NTAServices : INTAServices;
    Bmp: TBitmap;
    ImageIndex: integer;
    Intf: TCompileNotifier;
-
 begin
-
   inherited Create;
   FShowMsg := True;
   FFontName := C_DEFAULT_FONT_NAME;
   FFontSize := C_DEFAULT_FONT_SIZE;
-
   with TRegIniFile.Create(REG_KEY) do
   try
     FShowMsg  := ReadBool(REG_BUILD_OPTIONS, 'Show Messages', FShowMsg);
@@ -141,14 +119,10 @@ begin
   finally
     Free;
   end;
-
   ProjOptions := TProjOptions.Create;
-
   FOptions := TBuildOptions.Create();
-
   intf := TCompileNotifier.Create;
   CompNot := (BorlandIDEServices as IOTACompileServices).AddNotifier(Intf);
-
   { Main menu item }
    if Supports(BorlandIDEServices, INTAServices, NTAServices)
    then
@@ -172,33 +146,23 @@ begin
          FActionOptions.Visible := True;
          FActionOptions.OnExecute := MenuOptionsExecute;
          FActionOptions.Enabled := True;
-
          FMenuOptions := TMenuItem.Create(nil);
          FMenuOptions.Name := 'BuildEventsOptions';
          FMenuOptions.Caption := 'Build Options';
          FMenuOptions.AutoHotkeys := maAutomatic;
          FMenuOptions.Action := FActionOptions;
-
          NTAServices.AddActionMenu(FProjectMenu.Name, FActionOptions, FMenuOptions, True);
-
          FActionOptions.ImageIndex := ImageIndex;
          FMenuOptions.ImageIndex := ImageIndex;
-
       end;
-
    BuildOptionsForm := TBuildOptionsForm.Create(nil);
-
    TBADIToolsAPIFunctions.RegisterFormClassForTheming(TBuildOptionsForm, BuildOptionsForm);
-
 end;
-
 destructor TBuildOptionExpert.Destroy;
 var
   Service : INTAServices;
 begin
-
   Service := (BorlandIDEServices as INTAServices);
-
   { Destroy the menu item }
   if (FProjectMenu = nil) then
   begin
@@ -209,28 +173,22 @@ begin
     if (-1 <> FProjectMenu.IndexOf(FMenuOptions)) then
       FProjectMenu.Remove(FMenuOptions);
   end;
-
   FMenuOptions.Free;
   FActionOptions.Free;
-
   (BorlandIDEServices as IOTACompileServices).RemoveNotifier(CompNot);
-
   if Assigned(FOptions)
   then
      FOptions.Free;
-
   BuildOptionsForm.Free;
 //  ClearMessages([cmBuildEvents, cmAll]);
   inherited Destroy;
 end;
-
 function TBuildOptionExpert.AddAction(ACaption, AHint, AName: String;
   AExecuteEvent, AUpdateEvent: TNotifyEvent): TAction;
 var
   Service : INTAServices;
 begin
   Service := (BorlandIDEServices as INTAServices);
-
   Result := TAction.Create(Service.ActionList);
   with Result do
   begin
@@ -250,7 +208,6 @@ var
   Serv: IOTAModuleServices;
 begin
   Result := '';
-
   Serv := (BorlandIDEServices as IOTAModuleServices);
   if (Serv.CurrentModule <> nil) and
     (Serv.CurrentModule.CurrentEditor <> nil) then
@@ -258,7 +215,6 @@ begin
     Result := Serv.CurrentModule.CurrentEditor.FileName;
   end;
 end;
-
 function TBuildOptionExpert.GetSourceEditor: IOTASourceEditor;
 var
   Serv      : IOTAModuleServices;
@@ -276,18 +232,15 @@ begin
     end;
   end;
 end;
-
 function TBuildOptionExpert.Modified: Boolean;
 var
   Serv: IOTAModuleServices;
 begin
   Result := False;
-
   Serv := (BorlandIDEServices as IOTAModuleServices);
   if Serv.CurrentModule <> nil then
     Result := Serv.CurrentModule.CurrentEditor.Modified;
 end;
-
 function TBuildOptionExpert.BuildEventsGroup: IOTAMessageGroup;
 begin
   with (BorlandIDEServices as IOTAMessageServices) do
@@ -295,29 +248,23 @@ begin
     { First we try to retrieve if we already have group }
     if (FBuildEventsGroup = nil) then
       FBuildEventsGroup := GetGroup('Build Events');
-
     { if not, we will add new group }
     if (FBuildEventsGroup = nil) then
       FBuildEventsGroup := AddMessageGroup('Build Events');
-
     if (FBuildEventsGroup = nil) then
       FBuildEventsGroup := GetMessageGroup(0);
   end;
   Result := FBuildEventsGroup;
 end;
-
 {$ENDIF}
-
 function TBuildOptionExpert.GetModuleName: String;
 begin
   Result := GetCurrentProjectFileName;
 end;
-
 function TBuildOptionExpert.GetProjectName: String;
 begin
   Result := GetCurrentProjectName;
 end;
-
 procedure TBuildOptionExpert.LogLine(AType: TMessageType; AText: String);
 begin
   if ShowMessages then
@@ -326,19 +273,16 @@ begin
       C_MESSAGE_TYPE_COLOUR[AType], []);
   end;
 end;
-
 procedure TBuildOptionExpert.AddMessageTitle(AType: TMessageType; AText: String);
 begin
   if ShowMessages then
     AddMessage(AText, C_MESSAGE_TYPE_COLOUR[AType], []);
 end;
-
 procedure TBuildOptionExpert.LogLine(AType: TMessageType; const AFormat: String;
   AParams: array of const);
 begin
   LogLine(AType, Format(AFormat, AParams));
 end;
-
 procedure TBuildOptionExpert.LogMessages(AType: TMessageType;
   AStrings: TStrings);
 var
@@ -357,17 +301,14 @@ begin
         mType := mtWarning
       else
         mType := AType;
-
       LogLine(mType, AStrings[I]);
     end;
   end;
 end;
-
 procedure TBuildOptionExpert.MenuOptionsExecute(Sender: TObject);
 begin
    Options.ShowDialog(ModuleName);
 end;
-
 procedure TBuildOptionExpert.RemoveAction(AAction: TAction; AToolbar: TToolbar);
 var
   iCounter: Integer;
@@ -383,13 +324,11 @@ begin
     end;
   end;
 end;
-
 procedure TBuildOptionExpert.RemoveActionFromToolbar(AAction: TAction);
 var
   Services : INTAServices;
 begin
   Services := (BorlandIDEServices as INTAServices);
-
   RemoveAction(AAction, Services.ToolBar[sCustomToolBar]);
   RemoveAction(AAction, Services.ToolBar[sDesktopToolBar]);
   RemoveAction(AAction, Services.ToolBar[sStandardToolBar]);
@@ -397,7 +336,6 @@ begin
   RemoveAction(AAction, Services.ToolBar[sViewToolBar]);
 //  RemoveAction(AAction, Services.ToolBar['InternetToolBar']);
 end;
-
 procedure TBuildOptionExpert.LogResults(AType: TMessageType; AText: String);
 var
   slList: TStringList;
@@ -410,13 +348,11 @@ begin
     slList.Free;
   end;
 end;
-
 procedure TBuildOptionExpert.TriggerPostBuildEvent(ASuccess: Boolean);
 begin
   FBuildSuccess := ASuccess;
   FBuildTimer.Enabled := True;
 end;
-
 procedure TBuildOptionExpert.DoOnPostBuildTimerEvent(Sender: TObject);
 begin
   FBuildTimer.Enabled := False;
@@ -439,7 +375,6 @@ begin
     FBuildSuccess := False;
   end;
 end;
-
 procedure TBuildOptionExpert.ExecutePostBuildEvent(const Text: String);
 var
   Index, x: Integer;
@@ -454,19 +389,15 @@ var
   ShortName: String;
   ProjectDeployment: IProjectDeployment;
   RCResult: TReconcileResult;
-
+  TmpStr: String;
 begin
-
    PlatformConfigBuildOptions := Options.GetPlatformConfigBuildOptions(GetCurrentProject.CurrentPlatform + GetCurrentProject.CurrentConfiguration);
-
    if (Pos('Android', PlatformConfigBuildOptions.PlatformConfig) > 0) and
       (ProjOptions.GetParam('RunDex').OnOff)
    then
       begin
-
          AssignFile(ProjFile, GetCurrentProjectFileName);
          Reset(ProjFile);
-
          AssignFile(ProjFileOut, ExtractFilePath(GetCurrentProjectFileName) + StrBefore('.dproj', ExtractFileName(GetCurrentProjectFileName)) + 'New.dproj');
          ReWrite(ProjFileOut);
 
@@ -511,11 +442,9 @@ begin
 
                      for x := 0 to High(FileList) do
                         begin
-
                            if ExtractFileName(FileList[x]) = 'classes.dex'
                            then
                               Continue;
-
                            ShortName := 'Android\Debug\' + ExtractFileName(FileList[x]);
 
                            LineOut := '                <DeployFile LocalName="' + ShortName + '" Configuration="Debug" Class="File">';
@@ -602,9 +531,8 @@ begin
          then
             begin
                RCResult := ProjectDeployment.Reconcile();
-//               ProjectDeployment.SaveToMSBuild;
+               ProjectDeployment.SaveToMSBuild;
             end;
-
       end;
 
   if not PlatformConfigBuildOptions.PostBuildEnabled
@@ -619,37 +547,30 @@ begin
   LogLine(mtDebug, '%s Compiled in %s',
     [ProjectName, GetDoneTimeStr(FBuildSpan)]);
 
-  BuildEngine.RefreshMacros;
+   BuildEngine.RefreshMacros;
 
    if not Assigned(FBuildEvenStat)
    then
       FBuildEvenStat := TFBuildEvenStat.Create(Application);
 
-   FBuildEvenStat.PBuildEventStatHeader.Caption := 'Running Post BuildEvents';
+   FBuildEvenStat.PBuildEventStatHeader.Caption := 'Running PostBuild Events';
    FBuildEvenStat.Memo1.Lines.Text := '';
    FBuildEvenStat.Visible := True;
 
   try
-
     for Index := 0 to PlatformConfigBuildOptions.PostBuildEvents.Count - 1 do
     begin
-
       slList.Clear;
-
       if PlatformConfigBuildOptions.PostBuildEvents[Index].Param <> ''
       then
          if ProjOptions.GetParam(PlatformConfigBuildOptions.PostBuildEvents[Index].Param).OnOff = PlatformConfigBuildOptions.PostBuildEvents[Index].OnOff
          then
             begin
-
                Command := Trim(PlatformConfigBuildOptions.PostBuildEvents[Index].Command);
-
                if Command = '' then Continue;
                if Pos('REM', UpperCase(Command)) = 1 then Continue;
-
                AddMessageTitle(mtCustom,
                  Format('Post-build %s: %s', [Text, Command]));
-
                try
                  BuildResult := BuildEngine.Command(Command, slList);
                  LogResults(mtSuccess, BuildResult);
@@ -663,17 +584,13 @@ begin
                    LogException(E, 'TBuildOptionExpert.ExecutePostBuildEvent');
                  end;
                end;
-
             end
          else
       else
          begin
-
             Command := Trim(PlatformConfigBuildOptions.PostBuildEvents[Index].Command);
-
             if Command = '' then Continue;
             if Pos('REM', UpperCase(Command)) = 1 then Continue;
-
             AddMessageTitle(mtCustom,
               Format('Post-build %s: %s', [Text, Command]));
             try
@@ -688,21 +605,22 @@ begin
                 LogException(E, 'TBuildOptionExpert.ExecutePostBuildEvent');
               end;
             end;
-
          end;
-
     end;
-
   finally
     slList.Free;
   end;
-
   FBuildEvenStat.Visible := False;
-
+   with TIniFile.Create(ChangeFileExt(GetCurrentProjectFileName, '.ini')) do
+   try
+      TmpStr := ReadString('ProjOptions', 'Params', '');
+      TmpStr := StringReplace(TmpStr,'RunDex;True', 'RunDex;False', []);
+      WriteString('ProjOptions', 'Params', TmpStr);
+   finally
+      Free;
+   end;
 end;
-
 procedure TBuildOptionExpert.ExecutePreBuildEvent;
-
 var
   Index, x, i: Integer;
   Command: string;
@@ -711,24 +629,18 @@ var
   FileList: TArray<String>;
   FileLines: TStringList;
   Found: Boolean;
-
 begin
-
-  if (not FileExists(System.SysUtils.GetEnvironmentVariable('BDS') + '\bin\CodeGear.CommonMD.Targets')) and
-     (not FileExists(System.SysUtils.GetEnvironmentVariable('BDS') + '\bin\CodeGear.CommonNM.Targets'))
+  if (not FileExists(System.SysUtils.GetEnvironmentVariable('BDS') + '\bin\CodeGear.CommonMDDX.Targets')) and
+     (not FileExists(System.SysUtils.GetEnvironmentVariable('BDS') + '\bin\CodeGear.CommonNMDX.Targets'))
   then
      begin
         ShowMessage('Target files not found. You have to run Targets.exe, located in the bin directory.');
         Exit;
      end;
-
   FOptions.LoadProjectEvents(ModuleName);
-
   PlatformConfigBuildOptions := Options.GetPlatformConfigBuildOptions(GetCurrentProject.CurrentPlatform + GetCurrentProject.CurrentConfiguration);
-
   FBuildSpan := Now;
   ClearMessages([cmBuildEvents]);
-
    if Pos('Android', PlatformConfigBuildOptions.PlatformConfig) > 0
    then
       begin
@@ -739,91 +651,109 @@ begin
          then
             begin
 
-               if FileExists(BDSDir + '\bin\CodeGear.CommonMD.Targets')
+               if ProjOptions.GetParam('D8').OnOff
                then
                   begin
-                     RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonNM.Targets');
-                     RenameFile(BDSDir + '\bin\CodeGear.CommonMD.Targets', BDSDir + '\bin\CodeGear.Common.Targets');
-                  end;
 
-               FileLines := TStringList.Create;
-               FileLines.LoadFromFile(ExtractFileDir(GetCurrentProjectFileName) + '\AndroidManifest.template.xml');
+                     if FileExists(BDSDir + '\bin\CodeGear.CommonMDD8.Targets')
+                     then
+                        begin
 
-               i := 0;
+                           if not (FileExists(BDSDir + '\bin\CodeGear.CommonNMD8.Targets'))
+                           then
+                              RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonNMD8.Targets');
 
-               while (i < FileLines.Count) and (Pos('<application', FileLines[i]) = 0) do
-                  Inc(i);
+                           if not (FileExists(BDSDir + '\bin\CodeGear.CommonMDDX.Targets'))
+                           then
+                              RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonMDDX.Targets');
 
-               Found := False;
+                           if not (FileExists(BDSDir + '\bin\CodeGear.CommonNMDX.Targets'))
+                           then
+                              RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonNMDX.Targets');
 
-               while (i < FileLines.Count) and (Pos('>' ,FileLines[i]) = 0) do
-                  if Pos('android:name="android.support.multidex.MultiDexApplication"', FileLines[i]) > 0
-                  then
-                     begin
-                        Found := True;
-                        Break;
-                     end
-                  else
-                     Inc(i);
+                           RenameFile(BDSDir + '\bin\CodeGear.CommonMDD8.Targets', BDSDir + '\bin\CodeGear.Common.Targets');
 
-               if (not Found) and
-                  (Pos('android:name="android.support.multidex.MultiDexApplication"', FileLines[i]) = 0)
-               then
+                        end;
+
+                  end
+               else
                   begin
-                     FileLines[i] := StringReplace(FileLines[i], '>', '', []);
-                     Inc(i);
-                     FileLines.Insert(i, '        android:name="android.support.multidex.MultiDexApplication">');
-                     FileLines.SaveToFile(ExtractFileDir(GetCurrentProjectFileName) + '\AndroidManifest.template.xml');
-                  end;
 
-               FileLines.Free;
+                     if FileExists(BDSDir + '\bin\CodeGear.CommonMDDX.Targets')
+                     then
+                        begin
+
+                           if not (FileExists(BDSDir + '\bin\CodeGear.CommonNMD8.Targets'))
+                           then
+                              RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonNMD8.Targets');
+
+                           if not (FileExists(BDSDir + '\bin\CodeGear.CommonMDD8.Targets'))
+                           then
+                              RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonMDD8.Targets');
+
+                           if not (FileExists(BDSDir + '\bin\CodeGear.CommonNMDX.Targets'))
+                           then
+                              RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonNMDX.Targets');
+
+                           RenameFile(BDSDir + '\bin\CodeGear.CommonMDDX.Targets', BDSDir + '\bin\CodeGear.Common.Targets');
+
+                        end;
+
+                  end;
 
             end
          else
             begin
 
-               if FileExists(BDSDir + '\bin\CodeGear.CommonNM.Targets')
-               then
-                  begin
-                     RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonMD.Targets');
-                     RenameFile(BDSDir + '\bin\CodeGear.CommonNM.Targets', BDSDir + '\bin\CodeGear.Common.Targets');
-                  end;
-
-               FileLines := TStringList.Create;
-               FileLines.LoadFromFile(ExtractFileDir(GetCurrentProjectFileName) + '\AndroidManifest.template.xml');
-
-               i := 0;
-
-               while (i < FileLines.Count) and (Pos('<application', FileLines[i]) = 0) do
-                  Inc(i);
-
-               Found := False;
-
-               while (i < FileLines.Count) and (Pos('>' ,FileLines[i]) = 0) do
-                  if Pos('android:name="android.support.multidex.MultiDexApplication"', FileLines[i]) > 0
-                  then
-                     begin
-                        Found := True;
-                        Break;
-                     end
-                  else
-                     Inc(i);
-
-               if (Found) or
-                  (Pos('android:name="android.support.multidex.MultiDexApplication"', FileLines[i]) > 0)
+               if ProjOptions.GetParam('D8').OnOff
                then
                   begin
 
-                     if Pos('>' , FileLines[i]) > 0
+                     if FileExists(BDSDir + '\bin\CodeGear.CommonNMD8.Targets')
                      then
-                        FileLines[i - 1] := FileLines[i - 1] + '>';
+                        begin
 
-                     FileLines.Delete(i);
-                     FileLines.SaveToFile(ExtractFileDir(GetCurrentProjectFileName) + '\AndroidManifest.template.xml');
+                           if not (FileExists(BDSDir + '\bin\CodeGear.CommonMDD8.Targets'))
+                           then
+                              RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonMDD8.Targets');
+
+                           if not (FileExists(BDSDir + '\bin\CodeGear.CommonMDDX.Targets'))
+                           then
+                              RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonMDDX.Targets');
+
+                           if not (FileExists(BDSDir + '\bin\CodeGear.CommonNMD8.Targets'))
+                           then
+                              RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonNMD8.Targets');
+
+                           RenameFile(BDSDir + '\bin\CodeGear.CommonNMD8.Targets', BDSDir + '\bin\CodeGear.Common.Targets');
+
+                        end;
+
+                  end
+               else
+                  begin
+
+                     if FileExists(BDSDir + '\bin\CodeGear.CommonNMDX.Targets')
+                     then
+                        begin
+
+                           if not (FileExists(BDSDir + '\bin\CodeGear.CommonNMD8.Targets'))
+                           then
+                              RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonNMD8.Targets');
+
+                           if not (FileExists(BDSDir + '\bin\CodeGear.CommonMDD8.Targets'))
+                           then
+                              RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonMDD8.Targets');
+
+                           if not (FileExists(BDSDir + '\bin\CodeGear.CommonMDDX.Targets'))
+                           then
+                              RenameFile(BDSDir + '\bin\CodeGear.Common.Targets', BDSDir + '\bin\CodeGear.CommonMDDX.Targets');
+
+                           RenameFile(BDSDir + '\bin\CodeGear.CommonNMDX.Targets', BDSDir + '\bin\CodeGear.Common.Targets');
+
+                        end;
 
                   end;
-
-               FileLines.Free;
 
             end;
 
@@ -869,33 +799,24 @@ begin
   if not PlatformConfigBuildOptions.PreBuildEnabled
   then
      Exit;
-
   if PlatformConfigBuildOptions.PreBuildEvents.Count = 0
   then
      Exit;
-
   BuildEngine.RefreshMacros;
-
    if not Assigned(FBuildEvenStat)
    then
      FBuildEvenStat := TFBuildEvenStat.Create(Application);
-
-   FBuildEvenStat.PBuildEventStatHeader.Caption := 'Running Pre BuildEvents';
+   FBuildEvenStat.PBuildEventStatHeader.Caption := 'Running PreBuild Events';
    FBuildEvenStat.Memo1.Lines.Text := '';
-
   for Index := 0 to PlatformConfigBuildOptions.PreBuildEvents.Count - 1 do
   begin
-
     try
-
       if PlatformConfigBuildOptions.PreBuildEvents[Index].Param <> ''
       then
          if ProjOptions.GetParam(PlatformConfigBuildOptions.PreBuildEvents[Index].Param).OnOff = PlatformConfigBuildOptions.PreBuildEvents[Index].OnOff
          then
             begin
-
                Command := Trim(PlatformConfigBuildOptions.PreBuildEvents[Index].Command);
-
                if Command = '' then Continue;
                if Pos('REM', UpperCase(Command)) = 1 then Continue;
                AddMessageTitle(mtCustom,
@@ -905,16 +826,13 @@ begin
          else
       else
          begin
-
             Command := Trim(PlatformConfigBuildOptions.PreBuildEvents[Index].Command);
-
             if Command = '' then Continue;
             if Pos('REM', UpperCase(Command)) = 1 then Continue;
             AddMessageTitle(mtCustom,
               Format('Pre-build: %s', [Command]));
             LogResults(mtSuccess, BuildEngine.Command(Command));
          end;
-
     except
       on E: Exception do
       begin
@@ -922,18 +840,12 @@ begin
         LogException(E, 'TBuildOptionExpert.ExecutePreBuildEvent');
       end;
     end;
-
   end;
-
    FBuildEvenStat.Visible := False;
-
 end;
-
 procedure TBuildOptionExpert.LoadBuildOptions(const FileName: string);
 begin
-
   LogText('In - TBuildOptionExpert.LoadBuildOptions (File: %s)', [FileName]);
-
   try
 //    Options.SaveProjectEvents(True);
     Options.LoadProjectEvents(FileName);
@@ -947,7 +859,6 @@ begin
   end;
   LogText('Out - TBuildOptionExpert.LoadBuildOptions (File: %s)', [FileName]);
 end;
-
 procedure TBuildOptionExpert.AddMessage(AText: String; AForeColour: TColor;
   AStyle: TFontStyles; ABackColour : TColor = clWindow);
 var
@@ -966,7 +877,6 @@ begin
       Mesg.FontSize := FontSize;
       AddCustomMessage(Mesg As IOTACustomMessage
         {$IFDEF D7_UP}, BuildEventsGroup{$ENDIF});
-
       {$IFDEF D7_UP}
         ShowMessageView(BuildEventsGroup);
       {$ELSE}
@@ -979,7 +889,6 @@ begin
     On E: Exception do LogException(E, 'TBuildOptionExpert.AddMessage');
   end;
 end;
-
 procedure TBuildOptionExpert.ClearMessages(AMsgType: TClearMessages);
 begin
   with (BorlandIDEServices As IOTAMessageServices) do
@@ -992,7 +901,6 @@ begin
     if (cmAll in AMsgType) then ClearAllMessages;
   end;
 end;
-
 procedure TBuildOptionExpert.DoOnAutoSaveTimerEvent(Sender: TObject);
 var
   activeProject: IOTAProject;
@@ -1017,7 +925,6 @@ begin
     FAutoSaveTimer.Enabled := True;
   end;
 end;
-
 { TBADIToolsAPIFunctions }
 
 class procedure TBADIToolsAPIFunctions.RegisterFormClassForTheming(
@@ -1070,8 +977,6 @@ End;
 
 initialization
   FBuildOptionExpert := TBuildOptionExpert.Instance;
-
 finalization
   FreeAndNil(FBuildOptionExpert);
-
 end.

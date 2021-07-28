@@ -1,20 +1,15 @@
 unit uBuildOptionsForm;
-
 {$I BuildEvents.Inc}
-
 interface
-
 uses
   Windows, Messages, SysUtils, {$IFDEF D6_UP}Variants, {$ENDIF} Classes,
   Graphics, Controls, Forms, Dialogs, StdCtrls, Buttons, ComCtrls, ExtCtrls,
   uBuildMisc, Spin, Vcl.Menus,
-  ToolsAPI, AdvCombo, ColListb, Vcl.Grids, AdvObj, BaseGrid, AdvGrid, AdvCGrid,
+  ToolsAPI, ColListb, Vcl.Grids, AdvObj, BaseGrid, AdvGrid, AdvCGrid,
   Vcl.CheckLst, AdvSmoothListBox, AdvSmoothComboBox, AdvGroupBox,
   AdvSmoothTabPager, JvExComCtrls, JvHotKey, AdvOfficeButtons, AdvSmoothButton,
   Vcl.WinXCtrls;
-
 type
-
   TBuildOptionsForm = class(TForm)
     OpenDialog1: TOpenDialog;
     PUPreBuild: TPopupMenu;
@@ -74,6 +69,8 @@ type
     procedure TSPostBuildClick(Sender: TObject);
     procedure ACGPostbuildDrawCell(Sender: TObject; ACol, ARow: Integer;
       Rect: TRect; State: TGridDrawState);
+    procedure CBPlatFormsSelect(Sender: TObject);
+    procedure CBConfigSelect(Sender: TObject);
   private
     function GetFontNameIndex(AName: String): Integer;
     function GetSelectedFontName: String;
@@ -86,15 +83,11 @@ type
   public
     function Execute(AOptions : TBuildOptions) : Boolean;
   end;
-
 var
    ProjOptions: TProjOptions;
    BuildOptionsForm: TBuildOptionsForm;
-
 implementation
-
 {$R *.dfm}
-
 uses
   Registry,
   ShellAPI,
@@ -102,7 +95,6 @@ uses
   uBuildOptionExpert,
   uBuildEngine,
   UFParam;
-
 procedure DeleteRow(Grid: TStringGrid; ARow: Integer);
 var
   i: Integer;
@@ -111,7 +103,6 @@ begin
     Grid.Rows[i].Assign(Grid.Rows[i + 1]);
   Grid.RowCount := Grid.RowCount - 1;
 end;
-
 { TfrmOptions }
 function EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;
   FontType: Integer; Data: Pointer): Integer; stdcall;
@@ -119,93 +110,63 @@ begin
   TStrings(Data).Add(LogFont.lfFaceName);
   Result := 1;
 end;
-
 procedure TBuildOptionsForm.LoadFontNames;
 var
   DC: HDC;
   FontStrings: TStringList;
   i: integer;
-
 begin
-
   FontStrings := TStringList.Create;
-
   DC := GetDC(0);
   EnumFonts(DC, nil, @EnumFontsProc, Pointer(FontStrings));
   ReleaseDC(0, DC);
-
   cbFontNames.Items.Clear;
-
   for i := 0 to FontStrings.Count - 1 do
      cbFontNames.Items.Add(FontStrings[i]);
-
    FontStrings.DisposeOf;
-
 end;
-
 function TBuildOptionsForm.GetFontNameIndex(AName: String): Integer;
 begin
   Result := cbFontNames.Items.IndexOf(AName);
 end;
-
 function TBuildOptionsForm.GetSelectedFontName: String;
 begin
   Result := Trim(cbFontNames.Text);
   if (Result = EmptyStr) then Result := C_DEFAULT_FONT_NAME;
 end;
-
 function TBuildOptionsForm.Execute(AOptions: TBuildOptions): Boolean;
-
 var
   i: Integer;
   PlatForms: TArray<string>;
   CurrentProject: IOTAProject;
   Param: TParam;
-
 begin
-
   Caption := Format('Build Events for %s', [ExtractFileName(GetCurrentProjectName)]);
-
   TSMessages.State := TToggleSwitchState(Ord(BuildOptionExpert.ShowMessages));
-
   cbFontNames.ItemIndex := GetFontNameIndex(BuildOptionExpert.FontName);
   SpinEditSize.Value := BuildOptionExpert.FontSize;
-
   CurrentProject := GetCurrentProject;
   PlatForms := CurrentProject.SupportedPlatforms;
-
   CBConfig.OnChange := nil;
-
   CBConfig.ItemIndex := CBConfig.Items.IndexOf(CurrentProject.CurrentConfiguration);
-
   CBPlatForms.OnChange := nil;
-
   CBPlatForms.Items.Clear;
-
   for i := 0 to Length(PlatForms) - 1 do
      CBPlatForms.Items.Add(PlatForms[i]);
-
   CBPlatForms.ItemIndex:= CBPlatForms.Items.IndexOf(CurrentProject.CurrentPlatform);
-
   CLBParams.Clear;
-
   for i := 0 to ProjOptions.FParams.Count - 1 do
      Begin
         CLBParams.AddItem(ProjOptions.FParams[i].Name, nil);
         CLBParams.Checked[i] := ProjOptions.FParams[i].OnOff;
      end;
-
   SetScreen;
-
   Result := (ShowModal = mrOK);
-
   if Result then
   begin
-
     BuildOptionExpert.FontSize := SpinEditSize.Value;
     BuildOptionExpert.FontName := GetSelectedFontName;
     BuildOptionExpert.ShowMessages := Bool(Ord(TSMessages.State));
-
      with TRegIniFile.Create(REG_KEY) do
      try
        WriteBool(REG_BUILD_OPTIONS, 'Show Messages', BuildOptionExpert.FShowMsg);
@@ -214,107 +175,75 @@ begin
      finally
        Free;
      end;
-
     ProjOptions.FParams.Clear;
-
     for i := 0 to CLBParams.Count - 1 do
        begin
           Param.Name := CLBParams.Items[i];
           Param.OnOff := CLBParams.Checked[i];
           ProjOptions.FParams.Add(Param);
        end;
-
     ProjOptions.Save;
-
     SaveScreen;
-
     AOptions.SaveAll;
-
   end;
-
 end;
-
 procedure TBuildOptionsForm.FormCreate(Sender: TObject);
 begin
-
   LoadFontNames;
-
   ACGPostbuild.ColWidths[0] := 410;
   ACGPostbuild.ColWidths[1] := 74;
   ACGPostbuild.ColWidths[2] := 64;
   ACGPostbuild.Cells[0, 0] := 'Command';
   ACGPostbuild.Cells[1, 0] := 'Parameter';
   ACGPostbuild.Cells[2, 0] := 'On/Off';
-
   ACGPrebuild.ColWidths[0] := 410;
   ACGPrebuild.ColWidths[1] := 74;
   ACGPrebuild.ColWidths[2] := 64;
   ACGPrebuild.Cells[0, 0] := 'Command';
   ACGPrebuild.Cells[1, 0] := 'Parameter';
   ACGPrebuild.Cells[2, 0] := 'On/Off';
-
 end;
-
 procedure TBuildOptionsForm.SetScreen;
-
 var
    PlatformConfigBuildOptions: TPlatformConfigBuildOptions;
    i: integer;
-
 begin
-
    PlatformConfigBuildOptions := BuildOptionExpert.Options.GetPlatformConfigBuildOptions(CBPlatForms.Text + CBConfig.Text);
-
    ACGPreBuild.RowCount := 2;
    ACGPreBuild.Rows[1].Clear;
-
    for i := 0 to PlatformConfigBuildOptions.PreBuildEvents.Count - 1 do
       begin
-
          if i > 0
          then
             ACGPreBuild.RowCount := ACGPreBuild.RowCount + 1;
-
          ACGPreBuild.Cells[0, i + 1] := PlatformConfigBuildOptions.PreBuildEvents[i].Command;
          ACGPreBuild.Cells[1, i + 1] := PlatformConfigBuildOptions.PreBuildEvents[i].Param;
-
          if PlatformConfigBuildOptions.PreBuildEvents[i].OnOff
          then
             ACGPreBuild.Cells[2, i + 1] := 'On'
          else
             ACGPreBuild.Cells[2, i + 1] := 'Off';
-
       end;
-
    ACGPostBuild.RowCount := 2;
    ACGPostBuild.Rows[1].Clear;
-
    for i := 0 to PlatformConfigBuildOptions.PostBuildEvents.Count - 1 do
       begin
-
          if i > 0
          then
             ACGPostBuild.RowCount := ACGPostBuild.RowCount + 1;
-
          ACGPostBuild.Cells[0, i + 1] := PlatformConfigBuildOptions.PostBuildEvents[i].Command;
          ACGPostBuild.Cells[1, i + 1] := PlatformConfigBuildOptions.PostBuildEvents[i].Param;
-
          if PlatformConfigBuildOptions.PostBuildEvents[i].OnOff
          then
             ACGPostBuild.Cells[2, i + 1] := 'On'
          else
             ACGPostBuild.Cells[2, i + 1] := 'Off';
-
       end;
-
    cbPostBuildEvents.ItemIndex :=
      Integer(PlatformConfigBuildOptions.PostBuildOption);
-
    TSPrebuild.State := TToggleSwitchState(Ord(PlatformConfigBuildOptions.PreBuildEnabled));
    TSPostBuild.State := TToggleSwitchState(Ord(PlatformConfigBuildOptions.PostBuildEnabled));
-
 end;
-
 procedure TBuildOptionsForm.TSPostBuildClick(Sender: TObject);
 begin
   EnablePostBuild(Bool(Ord(TSPostBuild.State)));
@@ -374,11 +303,9 @@ begin
 end;
 
 procedure TBuildOptionsForm.AddParam1Click(Sender: TObject);
-
 var
    i: Integer;
    ParmR: TParam;
-
 begin
 
    if not Assigned(FAddParam)
@@ -405,17 +332,14 @@ begin
 end;
 
 procedure TBuildOptionsForm.BSaveClick(Sender: TObject);
-
 var
    i: integer;
    Param: TParam;
-
 begin
 
    BuildOptionExpert.FontSize := SpinEditSize.Value;
    BuildOptionExpert.FontName := GetSelectedFontName;
    BuildOptionExpert.ShowMessages := Bool(Ord(TSMessages.State));
-
    with TRegIniFile.Create(REG_KEY) do
       try
          WriteBool(REG_BUILD_OPTIONS, 'Show Messages', BuildOptionExpert.FShowMsg);
@@ -424,29 +348,21 @@ begin
       finally
          Free;
       end;
-
    ProjOptions.FParams.Clear;
-
    for i := 0 to CLBParams.Count - 1 do
       begin
          Param.Name := CLBParams.Items[i];
          Param.OnOff := CLBParams.Checked[i];
          ProjOptions.FParams.Add(Param);
       end;
-
    ProjOptions.Save;
-
    SaveScreen;
-
    BuildOptionExpert.Options.SaveAll;
-
 end;
 
 procedure TBuildOptionsForm.btnLoadClick(Sender: TObject);
 begin
-
   OpenDialog1.InitialDir := ExtractFilePath(GetCurrentProjectFileName);
-
   if (OpenDialog1.Execute)
   then
     if FileExists(OpenDialog1.FileName)
@@ -454,74 +370,50 @@ begin
        if AnsiLowerCase(ExtractFileExt(OpenDialog1.FileName)) = '.ini'
        then
           begin
-
              BuildOptionExpert.Options.CopyProjectEvents(OpenDialog1.FileName);
-
              CBPlatForms.ItemIndex := CBPlatForms.Items.IndexOf(GetCurrentProject.CurrentPlatform);
-
              CBConfig.ItemIndex := CBConfig.Items.IndexOf(GetCurrentProject.CurrentConfiguration);
-
           end;
-
 end;
-
 procedure TBuildOptionsForm.SaveScreen;
 
 var
    PlatformConfigBuildOptions: TPlatformConfigBuildOptions;
    i: integer;
    Event: TBuildCommand;
-
 begin
-
    PlatformConfigBuildOptions := BuildOptionExpert.Options.GetPlatformConfigBuildOptions(CBPlatForms.Text + CBConfig.Text);
-
    PlatformConfigBuildOptions.PreBuildEvents.Clear;
-
    for i := 1 to ACGPreBuild.RowCount - 1 do
       begin
-
          if ACGPreBuild.Cells[0, i] = ''
          then
             Break;
-
          Event.Command := ACGPreBuild.Cells[0, i];
          Event.Param := ACGPreBuild.Cells[1, i];
-
          if ACGPreBuild.Cells[2, i] = 'On'
          then
             Event.OnOff := True
          else
             Event.OnOff := False;
-
          PlatformConfigBuildOptions.PreBuildEvents.Add(Event);
-
       end;
-
    PlatformConfigBuildOptions.PostBuildEvents.Clear;
-
    for i := 1 to ACGPostBuild.RowCount - 1 do
       begin
-
          if ACGPostBuild.Cells[0, i] = ''
          then
             Break;
-
          Event.Command := ACGPostBuild.Cells[0, i];
          Event.Param := ACGPostBuild.Cells[1, i];
-
          if ACGPostBuild.Cells[2, i] = 'On'
          then
             Event.OnOff := True
          else
             Event.OnOff := False;
-
          PlatformConfigBuildOptions.PostBuildEvents.Add(Event);
-
       end;
-
    PlatformConfigBuildOptions.PostBuildOption := TPostBuildOption(cbPostBuildEvents.ItemIndex);
-   ProjOptions.FileName := ExtractFilePath(GetCurrentProjectFileName);
    PlatformConfigBuildOptions.PreBuildEnabled := Bool(Ord(TSPreBuild.State));
    PlatformConfigBuildOptions.PostBuildEnabled := Bool(Ord(TSPostBuild.State));
 
@@ -537,6 +429,11 @@ begin
    SaveScreen;
 end;
 
+procedure TBuildOptionsForm.CBConfigSelect(Sender: TObject);
+begin
+  SetScreen;
+end;
+
 procedure TBuildOptionsForm.cbFontNamesDrawItem(AControl: TWinControl;
   AIndex: Integer; ARect: TRect; AState: TOwnerDrawState);
 begin
@@ -547,7 +444,6 @@ begin
     TextOut(ARect.Left, ARect.Top, cbFontNames.Items[AIndex]);
   end;
 end;
-
 procedure TBuildOptionsForm.CBPlatFormsChange(Sender: TObject);
 begin
   SetScreen;
@@ -556,6 +452,12 @@ end;
 procedure TBuildOptionsForm.CBPlatFormsDropDown(Sender: TObject);
 begin
    SaveScreen;
+end;
+
+procedure TBuildOptionsForm.CBPlatFormsSelect(Sender: TObject);
+
+begin
+  SetScreen;
 end;
 
 procedure TBuildOptionsForm.DeleteParameter1Click(Sender: TObject);
@@ -599,12 +501,10 @@ begin
   ACGPostBuild.Enabled := AEnabled;
   cbPostBuildEvents.Enabled := AEnabled;
 end;
-
 procedure TBuildOptionsForm.EnablePreBuild(AEnabled: Boolean);
 begin
   ACGPreBuild.Enabled := AEnabled;
 end;
-
 procedure TBuildOptionsForm.PreDeleteEventClick(Sender: TObject);
 begin
 
@@ -626,10 +526,8 @@ begin
 end;
 
 procedure TBuildOptionsForm.PostNewEventClick(Sender: TObject);
-
 var
    TmpStr: string;
-
 begin
 
    TmpStr := ShowBuildCommandEditor('Post', '', True);
@@ -675,7 +573,6 @@ procedure TBuildOptionsForm.PreNewEventClick(Sender: TObject);
 
 var
    TmpStr: string;
-
 begin
 
    TmpStr := ShowBuildCommandEditor('Pre', '', True);
@@ -698,7 +595,7 @@ end;
 procedure TBuildOptionsForm.PUParamsPopup(Sender: TObject);
 begin
 
-   if CLBParams.ItemIndex < 2
+   if CLBParams.ItemIndex < 3
    then
       DeleteParameter1.Enabled := False
    else
